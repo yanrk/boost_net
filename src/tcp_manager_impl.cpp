@@ -114,54 +114,62 @@ void TcpManagerImpl::handle_accept(acceptor_type & acceptor, unsigned short port
     tcp_connection->io_service().post(boost::bind(&TcpConnection::start, tcp_connection));
 }
 
-bool TcpManagerImpl::create_connection(const std::string & host, const std::string & service, std::size_t identity, const char * bind_ip, unsigned short bind_port)
+bool TcpManagerImpl::create_connection(const std::string & host, const std::string & service, bool sync_connect, std::size_t identity, const char * bind_ip, unsigned short bind_port)
 {
-    typedef boost::asio::ip::tcp::resolver  resolver_type;
-    typedef resolver_type::query            query_type;
-    typedef resolver_type::iterator         iterator_type;
-    typedef boost::system::error_code       error_code_type;
-    typedef boost::asio::ip::tcp::endpoint  endpoint_type;
+    if (sync_connect)
+    {
+        return(sync_create_connection(host, service, identity, bind_ip, bind_port));
+    }
+    else
+    {
+        return(async_create_connection(host, service, identity, bind_ip, bind_port));
+    }
+}
+
+bool TcpManagerImpl::create_connection(const std::string & host, unsigned short port, bool sync_connect, std::size_t identity, const char * bind_ip, unsigned short bind_port)
+{
+    return(create_connection(host, boost::lexical_cast<std::string>(port), sync_connect, identity, bind_ip, bind_port));
+}
+
+bool TcpManagerImpl::sync_create_connection(const std::string & host, const std::string & service, std::size_t identity, const char * bind_ip, unsigned short bind_port)
+{
+    boost::asio::ip::tcp::endpoint endpoint;
+    if (nullptr == bind_ip || '\0' == *bind_ip)
+    {
+        endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), bind_port);
+    }
+    else
+    {
+        endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4::from_string(bind_ip), bind_port);
+    }
 
     bool passtive = false;
     tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_service_pool.get(), m_tcp_service, passtive, identity);
     TcpConnection::socket_type & socket = tcp_connection->socket();
 
-    endpoint_type endpoint;
-    if (0 != bind_port)
-    {
-        if (nullptr == bind_ip || 0 == strcmp(bind_ip, "0.0.0.0") || 0 == strcmp(bind_ip, "127.0.0.1"))
-        {
-            endpoint = endpoint_type(boost::asio::ip::tcp::v4(), bind_port);
-        }
-        else
-        {
-            endpoint = endpoint_type(boost::asio::ip::address_v4::from_string(bind_ip), bind_port);
-        }
-    }
-
-    resolver_type resolver(tcp_connection->io_service());
-    query_type query(host, service);
-    iterator_type iter_end;
-    error_code_type error = boost::asio::error::host_not_found;
-    for (iterator_type iter = resolver.resolve(query); error && iter_end != iter; ++iter)
+    boost::asio::ip::tcp::resolver resolver(tcp_connection->io_service());
+    boost::asio::ip::tcp::resolver::query query(host, service);
+    boost::asio::ip::tcp::resolver::iterator iter_end;
+    boost::system::error_code error = boost::asio::error::host_not_found;
+    for (boost::asio::ip::tcp::resolver::iterator iter = resolver.resolve(query); error && iter_end != iter; ++iter)
     {
         socket.close(error);
-        if (0 != bind_port)
+        if (0 != endpoint.port() || !endpoint.address().is_unspecified())
         {
             socket.open(endpoint.protocol(), error);
             if (error)
             {
-                continue;
+                return(false);
             }
             socket.set_option(boost::asio::ip::tcp::socket::reuse_address(true), error);
             if (error)
             {
-                continue;
+                return(false);
             }
             socket.bind(endpoint, error);
             if (error)
             {
-                continue;
+                return(false);
             }
         }
         socket.connect(*iter, error);
@@ -177,9 +185,26 @@ bool TcpManagerImpl::create_connection(const std::string & host, const std::stri
     return(true);
 }
 
-bool TcpManagerImpl::create_connection(const std::string & host, unsigned short port, std::size_t identity, const char * bind_ip, unsigned short bind_port)
+bool TcpManagerImpl::async_create_connection(const std::string & host, const std::string & service, std::size_t identity, const char * bind_ip, unsigned short bind_port)
 {
-    return(create_connection(host, boost::lexical_cast<std::string>(port), identity, bind_ip, bind_port));
+    boost::asio::ip::tcp::endpoint endpoint;
+    if (nullptr == bind_ip || '\0' == *bind_ip)
+    {
+        endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), bind_port);
+    }
+    else
+    {
+        endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4::from_string(bind_ip), bind_port);
+    }
+
+    bool passtive = false;
+    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_service_pool.get(), m_tcp_service, passtive, identity);
+
+    boost::asio::ip::tcp::resolver::query query(host, service);
+    resolver_ptr resolver = boost::factory<resolver_ptr>()(tcp_connection->io_service());
+    resolver->async_resolve(query, boost::bind(&TcpConnection::handle_resolve, tcp_connection, boost::asio::placeholders::error, boost::asio::placeholders::iterator, endpoint, resolver));
+
+    return(true);
 }
 
 } // namespace BoostNet end

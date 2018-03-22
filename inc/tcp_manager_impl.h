@@ -25,12 +25,13 @@ namespace BoostNet { // namespace BoostNet begin
 class TcpManagerImpl
 {
 public:
-    typedef boost::asio::io_service                 io_service_type;
-    typedef boost::asio::ip::tcp::endpoint          endpoint_type;
-    typedef boost::asio::ip::tcp::acceptor          acceptor_type;
-    typedef boost::ptr_vector<acceptor_type>        acceptors_type;
-    typedef IOServicePool                           io_service_pool_type;
-    typedef std::shared_ptr<TcpConnection>          tcp_connection_ptr;
+    typedef boost::asio::io_service                             io_service_type;
+    typedef boost::asio::ip::tcp::endpoint                      endpoint_type;
+    typedef boost::asio::ip::tcp::acceptor                      acceptor_type;
+    typedef boost::ptr_vector<acceptor_type>                    acceptors_type;
+    typedef IOServicePool                                       io_service_pool_type;
+    typedef std::shared_ptr<TcpConnection>                      tcp_connection_ptr;
+    typedef std::shared_ptr<boost::asio::ip::tcp::resolver>     resolver_ptr;
 
 public:
     TcpManagerImpl();
@@ -48,8 +49,12 @@ public:
     void run(bool blocking = false);
 
 public:
-    bool create_connection(const std::string & host, const std::string & service, std::size_t identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
-    bool create_connection(const std::string & host, unsigned short port, std::size_t identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
+    bool create_connection(const std::string & host, const std::string & service, bool sync_connect = true, std::size_t identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
+    bool create_connection(const std::string & host, unsigned short port, bool sync_connect = true, std::size_t identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
+
+private:
+    bool sync_create_connection(const std::string & host, const std::string & service, std::size_t identity, const char * bind_ip, unsigned short bind_port);
+    bool async_create_connection(const std::string & host, const std::string & service, std::size_t identity, const char * bind_ip, unsigned short bind_port);
 
 private:
     void start_accept(acceptor_type & acceptor, unsigned short port);

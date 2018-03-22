@@ -243,7 +243,7 @@ bool TestService::init()
         }
         for (std::size_t index = 0; index < m_max_connection_cnt; ++index)
         {
-            if (!m_tcp_manager.create_connection("127.0.0.1", 12345))
+            if (!m_tcp_manager.create_connection("127.0.0.1", 12345, false))
             {
                 return(false);
             }

@@ -100,8 +100,8 @@ public:
     void exit();
 
 public:
-    bool create_connection(const std::string & host, const std::string & service, std::size_t identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
-    bool create_connection(const std::string & host, unsigned short port, std::size_t identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
+    bool create_connection(const std::string & host, const std::string & service, bool sync_connect = true, std::size_t identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
+    bool create_connection(const std::string & host, unsigned short port, bool sync_connect = true, std::size_t identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
 
 private:
     TcpManagerImpl                                * m_manager_impl;

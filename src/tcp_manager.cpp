@@ -65,14 +65,14 @@ void TcpManager::exit()
     }
 }
 
-bool TcpManager::create_connection(const std::string & host, const std::string & service, std::size_t identity, const char * bind_ip, unsigned short bind_port)
+bool TcpManager::create_connection(const std::string & host, const std::string & service, bool sync_connect, std::size_t identity, const char * bind_ip, unsigned short bind_port)
 {
-    return(nullptr != m_manager_impl && m_manager_impl->create_connection(host, service, identity, bind_ip, bind_port));
+    return(nullptr != m_manager_impl && m_manager_impl->create_connection(host, service, sync_connect, identity, bind_ip, bind_port));
 }
 
-bool TcpManager::create_connection(const std::string & host, unsigned short port, std::size_t identity, const char * bind_ip, unsigned short bind_port)
+bool TcpManager::create_connection(const std::string & host, unsigned short port, bool sync_connect, std::size_t identity, const char * bind_ip, unsigned short bind_port)
 {
-    return(nullptr != m_manager_impl && m_manager_impl->create_connection(host, port, identity, bind_ip, bind_port));
+    return(nullptr != m_manager_impl && m_manager_impl->create_connection(host, port, sync_connect, identity, bind_ip, bind_port));
 }
 
 } // namespace BoostNet end

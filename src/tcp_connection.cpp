@@ -117,6 +117,48 @@ void TcpConnection::stop()
     }
 }
 
+void TcpConnection::handle_resolve(const boost::system::error_code & error, boost::asio::ip::tcp::resolver::iterator iterator, boost::asio::ip::tcp::endpoint host_endpoint, resolver_ptr resolver)
+{
+    boost::asio::ip::tcp::resolver::iterator iter_end;
+    if (iter_end != iterator)
+    {
+        boost::system::error_code connect_error_code = boost::asio::error::host_not_found;
+        m_socket.close(connect_error_code);
+        if (0 != host_endpoint.port() || !host_endpoint.address().is_unspecified())
+        {
+            m_socket.open(host_endpoint.protocol(), connect_error_code);
+            if (connect_error_code)
+            {
+                return;
+            }
+            m_socket.set_option(boost::asio::ip::tcp::socket::reuse_address(true), connect_error_code);
+            if (connect_error_code)
+            {
+                return;
+            }
+            m_socket.bind(host_endpoint, connect_error_code);
+            if (connect_error_code)
+            {
+                return;
+            }
+        }
+        boost::asio::ip::tcp::endpoint peer_endpoint(*iterator++);
+        m_socket.async_connect(peer_endpoint, boost::bind(&TcpConnection::handle_connect, shared_from_this(), boost::asio::placeholders::error, iterator, host_endpoint, resolver));
+    }
+}
+
+void TcpConnection::handle_connect(const boost::system::error_code & error, boost::asio::ip::tcp::resolver::iterator iterator, boost::asio::ip::tcp::endpoint host_endpoint, resolver_ptr resolver)
+{
+    if (error)
+    {
+        handle_resolve(error, iterator, host_endpoint, resolver);
+    }
+    else
+    {
+        io_service().post(boost::bind(&TcpConnection::start, shared_from_this()));
+    }
+}
+
 bool TcpConnection::send(const void * data, std::size_t len)
 {
     return(send_buffer_fill_len(data, len));

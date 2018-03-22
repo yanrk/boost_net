@@ -24,10 +24,11 @@ namespace BoostNet { // namespace BoostNet begin
 class TcpConnection : public TcpConnectionBase, public std::enable_shared_from_this<TcpConnection>
 {
 public:
-    typedef boost::asio::ip::tcp::socket            socket_type;
-    typedef boost::asio::io_service                 io_service_type;
-    typedef TcpRecvBuffer                           tcp_recv_buffer_type;
-    typedef TcpSendBuffer                           tcp_send_buffer_type;
+    typedef boost::asio::ip::tcp::socket                        socket_type;
+    typedef boost::asio::io_service                             io_service_type;
+    typedef TcpRecvBuffer                                       tcp_recv_buffer_type;
+    typedef TcpSendBuffer                                       tcp_send_buffer_type;
+    typedef std::shared_ptr<boost::asio::ip::tcp::resolver>     resolver_ptr;
 
 public:
     TcpConnection(io_service_type & io_service, TcpServiceBase * tcp_service, bool passtive, std::size_t identity);
@@ -61,12 +62,18 @@ public:
     void start();
     bool send(const void * data, std::size_t len);
 
+public:
+    void handle_resolve(const boost::system::error_code & error, boost::asio::ip::tcp::resolver::iterator iterator, boost::asio::ip::tcp::endpoint host_endpoint, resolver_ptr resolver);
+    void handle_connect(const boost::system::error_code & error, boost::asio::ip::tcp::resolver::iterator iterator, boost::asio::ip::tcp::endpoint host_endpoint, resolver_ptr resolver);
+
 private:
     void send();
     void recv();
     void stop();
     void post_send_data(const void * data, std::size_t len);
     void push_send_data(std::vector<char> data);
+
+private:
     void handle_send(const boost::system::error_code & error);
     void handle_recv(const boost::system::error_code & error, std::size_t bytes_transferred);
 
