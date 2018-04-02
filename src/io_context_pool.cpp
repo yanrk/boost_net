@@ -10,16 +10,16 @@
 
 #include <boost/bind.hpp>
 #include <boost/functional/factory.hpp>
-#include "io_service_pool.h"
+#include "io_context_pool.h"
 
 namespace BoostNet { // namespace BoostNet begin
 
 IOServicePool::IOServicePool()
-    : m_io_services()
+    : m_io_contexts()
     , m_works()
     , m_error_codes()
     , m_thread_group()
-    , m_next_io_service(0)
+    , m_next_io_context(0)
 {
 
 }
@@ -38,10 +38,10 @@ bool IOServicePool::init(std::size_t pool_size)
 
     for (std::size_t index = 0; index < pool_size; ++index)
     {
-        m_io_services.push_back(boost::factory<io_service_type *>()());
-        m_works.push_back(boost::factory<work_type *>()(m_io_services.back()));
+        m_io_contexts.push_back(boost::factory<io_context_type *>()());
+        m_works.push_back(boost::factory<work_type *>()(m_io_contexts.back()));
         m_error_codes.push_back(boost::factory<boost::system::error_code *>()());
-        if (nullptr == m_thread_group.create_thread(boost::bind(&io_service_type::run, boost::ref(m_io_services.back()), boost::ref(m_error_codes.back()))))
+        if (nullptr == m_thread_group.create_thread(boost::bind(&io_context_type::run, boost::ref(m_io_contexts.back()), boost::ref(m_error_codes.back()))))
         {
             return(false);
         }
@@ -54,9 +54,9 @@ void IOServicePool::exit()
 {
     m_works.clear();
 
-    for (std::size_t index = 0; index < m_io_services.size(); ++index)
+    for (std::size_t index = 0; index < m_io_contexts.size(); ++index)
     {
-        m_io_services[index].stop();
+        m_io_contexts[index].stop();
     }
 
     m_error_codes.clear();
@@ -70,14 +70,14 @@ void IOServicePool::run(bool blocking)
     }
 }
 
-IOServicePool::io_service_type & IOServicePool::get()
+IOServicePool::io_context_type & IOServicePool::get()
 {
-    return(m_io_services[m_next_io_service++ % m_io_services.size()]);
+    return(m_io_contexts[m_next_io_context++ % m_io_contexts.size()]);
 }
 
 std::size_t IOServicePool::size()
 {
-    return(m_io_services.size());
+    return(m_io_contexts.size());
 }
 
 } // namespace BoostNet end

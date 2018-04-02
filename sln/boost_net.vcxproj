@@ -39,14 +39,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\inc\boost_net.h" />
-    <ClInclude Include="..\inc\io_service_pool.h" />
+    <ClInclude Include="..\inc\io_context_pool.h" />
     <ClInclude Include="..\inc\tcp_connection.h" />
     <ClInclude Include="..\inc\tcp_manager_impl.h" />
     <ClInclude Include="..\inc\tcp_recv_buffer.h" />
     <ClInclude Include="..\inc\tcp_send_buffer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\io_service_pool.cpp" />
+    <ClCompile Include="..\src\io_context_pool.cpp" />
     <ClCompile Include="..\src\tcp_connection.cpp" />
     <ClCompile Include="..\src\tcp_manager.cpp" />
     <ClCompile Include="..\src\tcp_manager_impl.cpp" />
@@ -192,12 +192,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;EXPORT_BOOST_NET_DLL;WIN32;_DEBUG;_WINDOWS;_USRDLL;BOOST_NET_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_65_1/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_66_0/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../boost/boost_1_65_1/lib/windows/$(configuration)/;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../boost/boost_1_66_0/lib/windows/$(configuration)/;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='dll_debug|x64'">
@@ -208,12 +208,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;EXPORT_BOOST_NET_DLL;WIN32;_DEBUG;_WINDOWS;_USRDLL;BOOST_NET_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_65_1/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_66_0/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../boost/boost_1_65_1/lib/windows/$(configuration)_x64/;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../boost/boost_1_66_0/lib/windows/$(configuration)_x64/;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='lib_debug|Win32'">
@@ -224,14 +224,14 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;_DEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_65_1/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_66_0/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>../../boost/boost_1_65_1/lib/windows/$(configuration)/;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../boost/boost_1_66_0/lib/windows/$(configuration)/;</AdditionalLibraryDirectories>
       <TargetMachine>MachineX86</TargetMachine>
     </Lib>
   </ItemDefinitionGroup>
@@ -243,14 +243,14 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;_DEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_65_1/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_66_0/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>../../boost/boost_1_65_1/lib/windows/$(configuration)_x64/;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../boost/boost_1_66_0/lib/windows/$(configuration)_x64/;</AdditionalLibraryDirectories>
       <TargetMachine>MachineX64</TargetMachine>
     </Lib>
   </ItemDefinitionGroup>
@@ -264,14 +264,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;EXPORT_BOOST_NET_DLL;WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_NET_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_65_1/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_66_0/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../../boost/boost_1_65_1/lib/windows/$(configuration)/;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../boost/boost_1_66_0/lib/windows/$(configuration)/;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='dll_release|x64'">
@@ -284,14 +284,14 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;EXPORT_BOOST_NET_DLL;WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_NET_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_65_1/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_66_0/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../../boost/boost_1_65_1/lib/windows/$(configuration)_x64/;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../boost/boost_1_66_0/lib/windows/$(configuration)_x64/;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='lib_release|Win32'">
@@ -304,7 +304,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;NDEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_65_1/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_66_0/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -313,7 +313,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>../../boost/boost_1_65_1/lib/windows/$(configuration)/;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../boost/boost_1_66_0/lib/windows/$(configuration)/;</AdditionalLibraryDirectories>
       <TargetMachine>MachineX86</TargetMachine>
     </Lib>
   </ItemDefinitionGroup>
@@ -327,7 +327,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;NDEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_65_1/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../boost/boost_1_66_0/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -336,7 +336,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>../../boost/boost_1_65_1/lib/windows/$(configuration)_x64/;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../boost/boost_1_66_0/lib/windows/$(configuration)_x64/;</AdditionalLibraryDirectories>
       <TargetMachine>MachineX64</TargetMachine>
     </Lib>
   </ItemDefinitionGroup>

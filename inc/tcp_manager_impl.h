@@ -18,18 +18,18 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include "boost_net.h"
 #include "tcp_connection.h"
-#include "io_service_pool.h"
+#include "io_context_pool.h"
 
 namespace BoostNet { // namespace BoostNet begin
 
 class TcpManagerImpl
 {
 public:
-    typedef boost::asio::io_service                             io_service_type;
+    typedef boost::asio::io_context                             io_context_type;
     typedef boost::asio::ip::tcp::endpoint                      endpoint_type;
     typedef boost::asio::ip::tcp::acceptor                      acceptor_type;
     typedef boost::ptr_vector<acceptor_type>                    acceptors_type;
-    typedef IOServicePool                                       io_service_pool_type;
+    typedef IOServicePool                                       io_context_pool_type;
     typedef std::shared_ptr<TcpConnection>                      tcp_connection_ptr;
     typedef std::shared_ptr<boost::asio::ip::tcp::resolver>     resolver_ptr;
 
@@ -61,7 +61,7 @@ private:
     void handle_accept(acceptor_type & acceptor, unsigned short port, tcp_connection_ptr tcp_connection, const boost::system::error_code & error);
 
 private:
-    io_service_pool_type                            m_io_service_pool;
+    io_context_pool_type                            m_io_context_pool;
     acceptors_type                                  m_acceptors;
     TcpServiceBase                                * m_tcp_service;
 };

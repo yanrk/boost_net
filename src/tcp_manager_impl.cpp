@@ -17,7 +17,7 @@
 namespace BoostNet { // namespace BoostNet begin
 
 TcpManagerImpl::TcpManagerImpl()
-    : m_io_service_pool()
+    : m_io_context_pool()
     , m_acceptors()
     , m_tcp_service(nullptr)
 {
@@ -46,12 +46,12 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
         return(false);
     }
 
-    if (m_io_service_pool.size() > 0)
+    if (m_io_context_pool.size() > 0)
     {
         return(false);
     }
 
-    if (!m_io_service_pool.init(thread_count))
+    if (!m_io_context_pool.init(thread_count))
     {
         return(false);
     }
@@ -65,7 +65,7 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
             unsigned short port = port_array[index];
             endpoint_type endpoint(boost::asio::ip::tcp::v4(), port);
             bool reuse_address = true;
-            m_acceptors.push_back(boost::factory<acceptor_type *>()(m_io_service_pool.get(), endpoint, reuse_address));
+            m_acceptors.push_back(boost::factory<acceptor_type *>()(m_io_context_pool.get(), endpoint, reuse_address));
             start_accept(m_acceptors.back(), port);
         }
     }
@@ -83,21 +83,21 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
 
 void TcpManagerImpl::exit()
 {
-    m_io_service_pool.exit();
+    m_io_context_pool.exit();
     m_acceptors.clear();
     m_tcp_service = nullptr;
 }
 
 void TcpManagerImpl::run(bool blocking)
 {
-    m_io_service_pool.run(blocking);
+    m_io_context_pool.run(blocking);
 }
 
 void TcpManagerImpl::start_accept(acceptor_type & acceptor, unsigned short port)
 {
     bool passtive = true;
     std::size_t identity = port;
-    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_service_pool.get(), m_tcp_service, passtive, identity);
+    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_context_pool.get(), m_tcp_service, passtive, identity);
     acceptor.async_accept(tcp_connection->socket(), boost::bind(&TcpManagerImpl::handle_accept, this, boost::ref(acceptor), port, tcp_connection, boost::asio::placeholders::error));
 }
 
@@ -111,7 +111,7 @@ void TcpManagerImpl::handle_accept(acceptor_type & acceptor, unsigned short port
         return;
     }
 
-    tcp_connection->io_service().post(boost::bind(&TcpConnection::start, tcp_connection));
+    tcp_connection->io_context().post(boost::bind(&TcpConnection::start, tcp_connection));
 }
 
 bool TcpManagerImpl::create_connection(const std::string & host, const std::string & service, bool sync_connect, std::size_t identity, const char * bind_ip, unsigned short bind_port)
@@ -144,10 +144,10 @@ bool TcpManagerImpl::sync_create_connection(const std::string & host, const std:
     }
 
     bool passtive = false;
-    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_service_pool.get(), m_tcp_service, passtive, identity);
+    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_context_pool.get(), m_tcp_service, passtive, identity);
     TcpConnection::socket_type & socket = tcp_connection->socket();
 
-    boost::asio::ip::tcp::resolver resolver(tcp_connection->io_service());
+    boost::asio::ip::tcp::resolver resolver(tcp_connection->io_context());
     boost::asio::ip::tcp::resolver::query query(host, service);
     boost::asio::ip::tcp::resolver::iterator iter_end;
     boost::system::error_code error = boost::asio::error::host_not_found;
@@ -180,7 +180,7 @@ bool TcpManagerImpl::sync_create_connection(const std::string & host, const std:
         return(false);
     }
 
-    tcp_connection->io_service().post(boost::bind(&TcpConnection::start, tcp_connection));
+    tcp_connection->io_context().post(boost::bind(&TcpConnection::start, tcp_connection));
 
     return(true);
 }
@@ -198,10 +198,10 @@ bool TcpManagerImpl::async_create_connection(const std::string & host, const std
     }
 
     bool passtive = false;
-    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_service_pool.get(), m_tcp_service, passtive, identity);
+    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_context_pool.get(), m_tcp_service, passtive, identity);
 
     boost::asio::ip::tcp::resolver::query query(host, service);
-    resolver_ptr resolver = boost::factory<resolver_ptr>()(tcp_connection->io_service());
+    resolver_ptr resolver = boost::factory<resolver_ptr>()(tcp_connection->io_context());
     resolver->async_resolve(query, boost::bind(&TcpConnection::handle_resolve, tcp_connection, boost::asio::placeholders::error, boost::asio::placeholders::iterator, endpoint, resolver));
 
     return(true);

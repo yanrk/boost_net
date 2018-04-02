@@ -25,13 +25,13 @@ class TcpConnection : public TcpConnectionBase, public std::enable_shared_from_t
 {
 public:
     typedef boost::asio::ip::tcp::socket                        socket_type;
-    typedef boost::asio::io_service                             io_service_type;
+    typedef boost::asio::io_context                             io_context_type;
     typedef TcpRecvBuffer                                       tcp_recv_buffer_type;
     typedef TcpSendBuffer                                       tcp_send_buffer_type;
     typedef std::shared_ptr<boost::asio::ip::tcp::resolver>     resolver_ptr;
 
 public:
-    TcpConnection(io_service_type & io_service, TcpServiceBase * tcp_service, bool passtive, std::size_t identity);
+    TcpConnection(io_context_type & io_context, TcpServiceBase * tcp_service, bool passtive, std::size_t identity);
     virtual ~TcpConnection() override;
 
 public:
@@ -56,7 +56,7 @@ public:
 
 public:
     socket_type & socket();
-    io_service_type & io_service();
+    io_context_type & io_context();
     tcp_recv_buffer_type & recv_buffer();
     tcp_send_buffer_type & send_buffer();
     void start();

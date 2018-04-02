@@ -23,7 +23,7 @@
     <ClInclude Include="..\inc\boost_net.h">
       <Filter>inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\inc\io_service_pool.h">
+    <ClInclude Include="..\inc\io_context_pool.h">
       <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\tcp_connection.h">
@@ -40,7 +40,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\io_service_pool.cpp">
+    <ClCompile Include="..\src\io_context_pool.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\src\tcp_connection.cpp">

@@ -35,12 +35,12 @@ void * TcpConnectionBase::get_user_data()
     return(m_user_data);
 }
 
-TcpConnection::TcpConnection(io_service_type & io_service, TcpServiceBase * tcp_service, bool passtive, std::size_t identity)
+TcpConnection::TcpConnection(io_context_type & io_context, TcpServiceBase * tcp_service, bool passtive, std::size_t identity)
     : m_tcp_service(tcp_service)
     , m_running(false)
     , m_passtive(passtive)
     , m_identity(identity)
-    , m_socket(io_service)
+    , m_socket(io_context)
     , m_host_ip()
     , m_host_port(0)
     , m_peer_ip()
@@ -62,9 +62,9 @@ TcpConnection::socket_type & TcpConnection::socket()
     return(m_socket);
 }
 
-TcpConnection::io_service_type & TcpConnection::io_service()
+TcpConnection::io_context_type & TcpConnection::io_context()
 {
-    return(m_socket.get_io_service());
+    return(m_socket.get_io_context());
 }
 
 TcpConnection::tcp_recv_buffer_type & TcpConnection::recv_buffer()
@@ -155,7 +155,7 @@ void TcpConnection::handle_connect(const boost::system::error_code & error, boos
     }
     else
     {
-        io_service().post(boost::bind(&TcpConnection::start, shared_from_this()));
+        io_context().post(boost::bind(&TcpConnection::start, shared_from_this()));
     }
 }
 
@@ -169,7 +169,7 @@ void TcpConnection::close()
     boost::system::error_code ignore_error_code;
     m_socket.shutdown(socket_type::shutdown_both, ignore_error_code);
     m_socket.close(ignore_error_code);
-    m_socket.get_io_service().post(boost::bind(&TcpConnection::stop, shared_from_this()));
+    m_socket.get_io_context().post(boost::bind(&TcpConnection::stop, shared_from_this()));
 }
 
 void TcpConnection::recv()
@@ -184,7 +184,7 @@ void TcpConnection::send()
 
 void TcpConnection::post_send_data(const void * data, std::size_t len)
 {
-    io_service().post(boost::bind(&TcpConnection::push_send_data, shared_from_this(), std::vector<char>(reinterpret_cast<const char *>(data), reinterpret_cast<const char *>(data) + len)));
+    io_context().post(boost::bind(&TcpConnection::push_send_data, shared_from_this(), std::vector<char>(reinterpret_cast<const char *>(data), reinterpret_cast<const char *>(data) + len)));
 }
 
 void TcpConnection::push_send_data(std::vector<char> data)
