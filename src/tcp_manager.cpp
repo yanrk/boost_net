@@ -30,29 +30,29 @@ bool TcpManager::init(TcpServiceBase * tcp_service, std::size_t thread_count, un
 {
     if (nullptr == tcp_service)
     {
-        return(false);
+        return (false);
     }
 
     if (nullptr != m_manager_impl)
     {
-        return(false);
+        return (false);
     }
 
     m_manager_impl = boost::factory<TcpManagerImpl *>()();
     if (nullptr == m_manager_impl)
     {
-        return(false);
+        return (false);
     }
 
     if (m_manager_impl->init(tcp_service, thread_count, port_array, port_count))
     {
-        return(true);
+        return (true);
     }
 
     boost::checked_delete(m_manager_impl);
     m_manager_impl = nullptr;
 
-    return(false);
+    return (false);
 }
 
 void TcpManager::exit()
@@ -67,12 +67,12 @@ void TcpManager::exit()
 
 bool TcpManager::create_connection(const std::string & host, const std::string & service, bool sync_connect, std::size_t identity, const char * bind_ip, unsigned short bind_port)
 {
-    return(nullptr != m_manager_impl && m_manager_impl->create_connection(host, service, sync_connect, identity, bind_ip, bind_port));
+    return (nullptr != m_manager_impl && m_manager_impl->create_connection(host, service, sync_connect, identity, bind_ip, bind_port));
 }
 
 bool TcpManager::create_connection(const std::string & host, unsigned short port, bool sync_connect, std::size_t identity, const char * bind_ip, unsigned short bind_port)
 {
-    return(nullptr != m_manager_impl && m_manager_impl->create_connection(host, port, sync_connect, identity, bind_ip, bind_port));
+    return (nullptr != m_manager_impl && m_manager_impl->create_connection(host, port, sync_connect, identity, bind_ip, bind_port));
 }
 
 } // namespace BoostNet end

@@ -14,7 +14,7 @@ namespace BoostNet { // namespace BoostNet begin
 
 bool TcpSendBuffer::empty() const
 {
-    return(m_buffer_deque.empty());
+    return (m_buffer_deque.empty());
 }
 
 void TcpSendBuffer::commit(std::vector<char> && data)
@@ -24,7 +24,7 @@ void TcpSendBuffer::commit(std::vector<char> && data)
 
 TcpSendBuffer::const_buffers_type TcpSendBuffer::data() const
 {
-    return(m_buffer_deque.front());
+    return (m_buffer_deque.front());
 }
 
 void TcpSendBuffer::consume()

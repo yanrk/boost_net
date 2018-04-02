@@ -33,27 +33,27 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
 {
     if (nullptr == tcp_service)
     {
-        return(false);
+        return (false);
     }
 
     if (0 == thread_count)
     {
-        return(false);
+        return (false);
     }
 
     if (nullptr == port_array && 0 != port_count)
     {
-        return(false);
+        return (false);
     }
 
     if (m_io_context_pool.size() > 0)
     {
-        return(false);
+        return (false);
     }
 
     if (!m_io_context_pool.init(thread_count))
     {
-        return(false);
+        return (false);
     }
 
     m_tcp_service = tcp_service;
@@ -71,14 +71,14 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
     }
     catch (boost::system::error_code &)
     {
-        return(false);
+        return (false);
     }
     catch (...)
     {
-        return(false);
+        return (false);
     }
 
-    return(true);
+    return (true);
 }
 
 void TcpManagerImpl::exit()
@@ -118,17 +118,17 @@ bool TcpManagerImpl::create_connection(const std::string & host, const std::stri
 {
     if (sync_connect)
     {
-        return(sync_create_connection(host, service, identity, bind_ip, bind_port));
+        return (sync_create_connection(host, service, identity, bind_ip, bind_port));
     }
     else
     {
-        return(async_create_connection(host, service, identity, bind_ip, bind_port));
+        return (async_create_connection(host, service, identity, bind_ip, bind_port));
     }
 }
 
 bool TcpManagerImpl::create_connection(const std::string & host, unsigned short port, bool sync_connect, std::size_t identity, const char * bind_ip, unsigned short bind_port)
 {
-    return(create_connection(host, boost::lexical_cast<std::string>(port), sync_connect, identity, bind_ip, bind_port));
+    return (create_connection(host, boost::lexical_cast<std::string>(port), sync_connect, identity, bind_ip, bind_port));
 }
 
 bool TcpManagerImpl::sync_create_connection(const std::string & host, const std::string & service, std::size_t identity, const char * bind_ip, unsigned short bind_port)
@@ -159,17 +159,17 @@ bool TcpManagerImpl::sync_create_connection(const std::string & host, const std:
             socket.open(endpoint.protocol(), error);
             if (error)
             {
-                return(false);
+                return (false);
             }
             socket.set_option(boost::asio::ip::tcp::socket::reuse_address(true), error);
             if (error)
             {
-                return(false);
+                return (false);
             }
             socket.bind(endpoint, error);
             if (error)
             {
-                return(false);
+                return (false);
             }
         }
         socket.connect(*iter, error);
@@ -177,12 +177,12 @@ bool TcpManagerImpl::sync_create_connection(const std::string & host, const std:
 
     if (error)
     {
-        return(false);
+        return (false);
     }
 
     tcp_connection->io_context().post(boost::bind(&TcpConnection::start, tcp_connection));
 
-    return(true);
+    return (true);
 }
 
 bool TcpManagerImpl::async_create_connection(const std::string & host, const std::string & service, std::size_t identity, const char * bind_ip, unsigned short bind_port)
@@ -204,7 +204,7 @@ bool TcpManagerImpl::async_create_connection(const std::string & host, const std
     resolver_ptr resolver = boost::factory<resolver_ptr>()(tcp_connection->io_context());
     resolver->async_resolve(query, boost::bind(&TcpConnection::handle_resolve, tcp_connection, boost::asio::placeholders::error, boost::asio::placeholders::iterator, endpoint, resolver));
 
-    return(true);
+    return (true);
 }
 
 } // namespace BoostNet end

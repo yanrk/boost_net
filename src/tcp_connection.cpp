@@ -32,7 +32,7 @@ void TcpConnectionBase::set_user_data(void * user_data)
 
 void * TcpConnectionBase::get_user_data()
 {
-    return(m_user_data);
+    return (m_user_data);
 }
 
 TcpConnection::TcpConnection(io_context_type & io_context, TcpServiceBase * tcp_service, bool passtive, std::size_t identity)
@@ -59,22 +59,22 @@ TcpConnection::~TcpConnection()
 
 TcpConnection::socket_type & TcpConnection::socket()
 {
-    return(m_socket);
+    return (m_socket);
 }
 
 TcpConnection::io_context_type & TcpConnection::io_context()
 {
-    return(m_socket.get_io_context());
+    return (m_socket.get_io_context());
 }
 
 TcpConnection::tcp_recv_buffer_type & TcpConnection::recv_buffer()
 {
-    return(m_recv_buffer);
+    return (m_recv_buffer);
 }
 
 TcpConnection::tcp_send_buffer_type & TcpConnection::send_buffer()
 {
-    return(m_send_buffer);
+    return (m_send_buffer);
 }
 
 void TcpConnection::start()
@@ -161,7 +161,7 @@ void TcpConnection::handle_connect(const boost::system::error_code & error, boos
 
 bool TcpConnection::send(const void * data, std::size_t len)
 {
-    return(send_buffer_fill_len(data, len));
+    return (send_buffer_fill_len(data, len));
 }
 
 void TcpConnection::close()
@@ -259,43 +259,43 @@ void TcpConnection::get_peer_address(std::string & ip, unsigned short & port)
 
 const void * TcpConnection::recv_buffer_data()
 {
-    return(reinterpret_cast<const void *>(m_recv_buffer.c_str()));
+    return (reinterpret_cast<const void *>(m_recv_buffer.c_str()));
 }
 
 std::size_t TcpConnection::recv_buffer_size()
 {
-    return(m_recv_buffer.size());
+    return (m_recv_buffer.size());
 }
 
 bool TcpConnection::recv_buffer_copy_len(void * buf, std::size_t len)
 {
     if (nullptr == buf || m_recv_buffer.size() < len)
     {
-        return(false);
+        return (false);
     }
     memcpy(buf, m_recv_buffer.c_str(), len);
-    return(true);
+    return (true);
 }
 
 bool TcpConnection::recv_buffer_move_len(void * buf, std::size_t len)
 {
     if (nullptr == buf || m_recv_buffer.size() < len)
     {
-        return(false);
+        return (false);
     }
     memcpy(buf, m_recv_buffer.c_str(), len);
     m_recv_buffer.consume(len);
-    return(true);
+    return (true);
 }
 
 bool TcpConnection::recv_buffer_drop_len(std::size_t len)
 {
     if (m_recv_buffer.size() < len)
     {
-        return(false);
+        return (false);
     }
     m_recv_buffer.consume(len);
-    return(true);
+    return (true);
 }
 
 void TcpConnection::recv_buffer_water_mark(std::size_t len)
@@ -307,13 +307,13 @@ bool TcpConnection::send_buffer_fill_len(const void * data, std::size_t len)
 {
     if (nullptr == data)
     {
-        return(0 == len);
+        return (0 == len);
     }
     if (0 != len)
     {
         post_send_data(data, len);
     }
-    return(true);
+    return (true);
 }
 
 } // namespace BoostNet end
