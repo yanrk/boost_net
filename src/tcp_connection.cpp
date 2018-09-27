@@ -91,14 +91,22 @@ void TcpConnection::start()
     {
         if (nullptr != m_tcp_service)
         {
-            m_tcp_service->on_accept(shared_from_this(), static_cast<unsigned short>(m_identity));
+            if (!m_tcp_service->on_accept(shared_from_this(), static_cast<unsigned short>(m_identity)))
+            {
+                close();
+                return;
+            }
         }
     }
     else
     {
         if (nullptr != m_tcp_service)
         {
-            m_tcp_service->on_connect(shared_from_this(), m_identity);
+            if (!m_tcp_service->on_connect(shared_from_this(), m_identity))
+            {
+                close();
+                return;
+            }
         }
     }
 
@@ -211,7 +219,11 @@ void TcpConnection::handle_recv(const boost::system::error_code & error, std::si
     {
         if (m_recv_buffer.size() >= m_recv_water_mark)
         {
-            m_tcp_service->on_recv(shared_from_this());
+            if (!m_tcp_service->on_recv(shared_from_this()))
+            {
+                close();
+                return;
+            }
         }
     }
     else
@@ -236,7 +248,11 @@ void TcpConnection::handle_send(const boost::system::error_code & error)
     {
         if (nullptr != m_tcp_service)
         {
-            m_tcp_service->on_send(shared_from_this());
+            if (!m_tcp_service->on_send(shared_from_this()))
+            {
+                close();
+                return;
+            }
         }
     }
     else
