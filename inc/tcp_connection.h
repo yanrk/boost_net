@@ -78,6 +78,7 @@ private:
     void handle_recv(const boost::system::error_code & error, std::size_t bytes_transferred);
 
 private:
+    io_context_type                               & m_io_context;
     TcpServiceBase                                * m_tcp_service;
     bool                                            m_running;
     bool                                            m_passtive;

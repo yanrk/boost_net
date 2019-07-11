@@ -36,7 +36,8 @@ void * TcpConnectionBase::get_user_data()
 }
 
 TcpConnection::TcpConnection(io_context_type & io_context, TcpServiceBase * tcp_service, bool passtive, std::size_t identity)
-    : m_tcp_service(tcp_service)
+    : m_io_context(io_context)
+    , m_tcp_service(tcp_service)
     , m_running(false)
     , m_passtive(passtive)
     , m_identity(identity)
@@ -64,7 +65,7 @@ TcpConnection::socket_type & TcpConnection::socket()
 
 TcpConnection::io_context_type & TcpConnection::io_context()
 {
-    return (m_socket.get_io_context());
+    return (m_io_context);
 }
 
 TcpConnection::tcp_recv_buffer_type & TcpConnection::recv_buffer()
@@ -177,7 +178,7 @@ void TcpConnection::close()
     boost::system::error_code ignore_error_code;
     m_socket.shutdown(socket_type::shutdown_both, ignore_error_code);
     m_socket.close(ignore_error_code);
-    m_socket.get_io_context().post(boost::bind(&TcpConnection::stop, shared_from_this()));
+    m_io_context.post(boost::bind(&TcpConnection::stop, shared_from_this()));
 }
 
 void TcpConnection::recv()
