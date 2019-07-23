@@ -5,12 +5,11 @@
  * Email       : yanrkchina@163.com
  * Blog        : blog.csdn.net/cxxmaker
  * Version     : 2.0
- * Copyright(C): 2018
+ * Copyright(C): 2018 - 2020
  ********************************************************/
 
 #include <boost/functional/factory.hpp>
 #include <boost/checked_delete.hpp>
-#include "boost_net.h"
 #include "tcp_manager_impl.h"
 
 namespace BoostNet { // namespace BoostNet begin

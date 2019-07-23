@@ -5,11 +5,10 @@
  * Email       : yanrkchina@163.com
  * Blog        : blog.csdn.net/cxxmaker
  * Version     : 2.0
- * Copyright(C): 2018
+ * Copyright(C): 2018 - 2020
  ********************************************************/
 
 #include <boost/bind.hpp>
-#include "boost_net.h"
 #include "tcp_connection.h"
 
 namespace BoostNet { // namespace BoostNet begin
@@ -35,11 +34,11 @@ void * TcpConnectionBase::get_user_data()
     return (m_user_data);
 }
 
-TcpConnection::TcpConnection(io_context_type & io_context, TcpServiceBase * tcp_service, bool passtive, std::size_t identity)
+TcpConnection::TcpConnection(io_context_type & io_context, TcpServiceBase * tcp_service, bool passive, std::size_t identity)
     : m_io_context(io_context)
     , m_tcp_service(tcp_service)
     , m_running(false)
-    , m_passtive(passtive)
+    , m_passive(passive)
     , m_identity(identity)
     , m_socket(io_context)
     , m_host_ip()
@@ -88,7 +87,7 @@ void TcpConnection::start()
 
     m_running = true;
 
-    if (m_passtive)
+    if (m_passive)
     {
         if (nullptr != m_tcp_service)
         {
@@ -166,11 +165,6 @@ void TcpConnection::handle_connect(const boost::system::error_code & error, boos
     {
         io_context().post(boost::bind(&TcpConnection::start, shared_from_this()));
     }
-}
-
-bool TcpConnection::send(const void * data, std::size_t len)
-{
-    return (send_buffer_fill_len(data, len));
 }
 
 void TcpConnection::close()

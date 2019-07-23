@@ -5,10 +5,9 @@
  * Email       : yanrkchina@163.com
  * Blog        : blog.csdn.net/cxxmaker
  * Version     : 2.0
- * Copyright(C): 2018
+ * Copyright(C): 2018 - 2020
  ********************************************************/
 
-#include <cstring>
 #include <boost/bind.hpp>
 #include <boost/functional/factory.hpp>
 #include <boost/lexical_cast.hpp>
@@ -95,9 +94,9 @@ void TcpManagerImpl::run(bool blocking)
 
 void TcpManagerImpl::start_accept(acceptor_type & acceptor, unsigned short port)
 {
-    bool passtive = true;
+    bool passive = true;
     std::size_t identity = port;
-    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_context_pool.get(), m_tcp_service, passtive, identity);
+    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_context_pool.get(), m_tcp_service, passive, identity);
     acceptor.async_accept(tcp_connection->socket(), boost::bind(&TcpManagerImpl::handle_accept, this, boost::ref(acceptor), port, tcp_connection, boost::asio::placeholders::error));
 }
 
@@ -143,9 +142,9 @@ bool TcpManagerImpl::sync_create_connection(const std::string & host, const std:
         endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4::from_string(bind_ip), bind_port);
     }
 
-    bool passtive = false;
-    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_context_pool.get(), m_tcp_service, passtive, identity);
-    TcpConnection::socket_type & socket = tcp_connection->socket();
+    bool passive = false;
+    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_context_pool.get(), m_tcp_service, passive, identity);
+    tcp_connection_type::socket_type & socket = tcp_connection->socket();
 
     boost::asio::ip::tcp::resolver resolver(tcp_connection->io_context());
     boost::asio::ip::tcp::resolver::query query(host, service);
@@ -197,8 +196,8 @@ bool TcpManagerImpl::async_create_connection(const std::string & host, const std
         endpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::address_v4::from_string(bind_ip), bind_port);
     }
 
-    bool passtive = false;
-    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_context_pool.get(), m_tcp_service, passtive, identity);
+    bool passive = false;
+    tcp_connection_ptr tcp_connection = boost::factory<tcp_connection_ptr>()(m_io_context_pool.get(), m_tcp_service, passive, identity);
 
     boost::asio::ip::tcp::resolver::query query(host, service);
     resolver_ptr resolver = boost::factory<resolver_ptr>()(tcp_connection->io_context());

@@ -38,6 +38,18 @@
     <ClInclude Include="..\inc\tcp_send_buffer.h">
       <Filter>inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\inc\udp_acceptor.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\udp_active_connection.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\udp_manager_impl.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\udp_passive_connection.h">
+      <Filter>inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\io_context_pool.cpp">
@@ -59,6 +71,27 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\src\tcp_service.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\udp_acceptor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\udp_active_connection.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\udp_connection.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\udp_manager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\udp_manager_impl.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\udp_passive_connection.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\udp_service.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

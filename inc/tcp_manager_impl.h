@@ -5,7 +5,7 @@
  * Email       : yanrkchina@163.com
  * Blog        : blog.csdn.net/cxxmaker
  * Version     : 2.0
- * Copyright(C): 2018
+ * Copyright(C): 2018 - 2020
  ********************************************************/
 
 #ifndef BOOST_NET_TCP_MANAGER_IMPLEMENT_H
@@ -30,7 +30,8 @@ public:
     typedef boost::asio::ip::tcp::acceptor                      acceptor_type;
     typedef boost::ptr_vector<acceptor_type>                    acceptors_type;
     typedef IOServicePool                                       io_context_pool_type;
-    typedef std::shared_ptr<TcpConnection>                      tcp_connection_ptr;
+    typedef TcpConnection                                       tcp_connection_type;
+    typedef std::shared_ptr<tcp_connection_type>                tcp_connection_ptr;
     typedef std::shared_ptr<boost::asio::ip::tcp::resolver>     resolver_ptr;
 
 public:
@@ -39,7 +40,9 @@ public:
 
 public:
     TcpManagerImpl(const TcpManagerImpl &) = delete;
+    TcpManagerImpl(TcpManagerImpl &&) = delete;
     TcpManagerImpl & operator = (const TcpManagerImpl &) = delete;
+    TcpManagerImpl & operator = (TcpManagerImpl &&) = delete;
 
 public:
     bool init(TcpServiceBase * tcp_service, std::size_t thread_count, unsigned short port_array[], std::size_t port_count);

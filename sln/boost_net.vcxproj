@@ -44,6 +44,10 @@
     <ClInclude Include="..\inc\tcp_manager_impl.h" />
     <ClInclude Include="..\inc\tcp_recv_buffer.h" />
     <ClInclude Include="..\inc\tcp_send_buffer.h" />
+    <ClInclude Include="..\inc\udp_acceptor.h" />
+    <ClInclude Include="..\inc\udp_active_connection.h" />
+    <ClInclude Include="..\inc\udp_manager_impl.h" />
+    <ClInclude Include="..\inc\udp_passive_connection.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\io_context_pool.cpp" />
@@ -53,6 +57,13 @@
     <ClCompile Include="..\src\tcp_recv_buffer.cpp" />
     <ClCompile Include="..\src\tcp_send_buffer.cpp" />
     <ClCompile Include="..\src\tcp_service.cpp" />
+    <ClCompile Include="..\src\udp_acceptor.cpp" />
+    <ClCompile Include="..\src\udp_active_connection.cpp" />
+    <ClCompile Include="..\src\udp_connection.cpp" />
+    <ClCompile Include="..\src\udp_manager.cpp" />
+    <ClCompile Include="..\src\udp_manager_impl.cpp" />
+    <ClCompile Include="..\src\udp_passive_connection.cpp" />
+    <ClCompile Include="..\src\udp_service.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8F5D37A7-760E-4E91-AB76-E47410AA2E21}</ProjectGuid>

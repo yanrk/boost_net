@@ -5,7 +5,7 @@
  * Email       : yanrkchina@163.com
  * Blog        : blog.csdn.net/cxxmaker
  * Version     : 2.0
- * Copyright(C): 2018
+ * Copyright(C): 2018 - 2020
  ********************************************************/
 
 #include <boost/cast.hpp>

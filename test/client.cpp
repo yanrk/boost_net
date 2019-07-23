@@ -3,7 +3,12 @@
 
 int main(int, char *[])
 {
-    TestService client(true, 0, 100000);
+    bool use_tcp = true;
+    bool requester = true;
+    std::size_t send_times = 0;
+    std::size_t connection_count = 100000;
+
+    TestService client(use_tcp, requester, send_times, connection_count);
 
     client.init();
 
@@ -11,5 +16,5 @@ int main(int, char *[])
 
     client.exit();
 
-    return(0);
+    return (0);
 }

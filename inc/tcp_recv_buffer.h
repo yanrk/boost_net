@@ -5,7 +5,7 @@
  * Email       : yanrkchina@163.com
  * Blog        : blog.csdn.net/cxxmaker
  * Version     : 2.0
- * Copyright(C): 2018
+ * Copyright(C): 2018 - 2020
  ********************************************************/
 
 #ifndef BOOST_NET_TCP_RECV_BUFFER_H

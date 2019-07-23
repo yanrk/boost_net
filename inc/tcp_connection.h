@@ -5,7 +5,7 @@
  * Email       : yanrkchina@163.com
  * Blog        : blog.csdn.net/cxxmaker
  * Version     : 2.0
- * Copyright(C): 2018
+ * Copyright(C): 2018 - 2020
  ********************************************************/
 
 #ifndef BOOST_NET_TCP_CONNECTION_H
@@ -31,12 +31,14 @@ public:
     typedef std::shared_ptr<boost::asio::ip::tcp::resolver>     resolver_ptr;
 
 public:
-    TcpConnection(io_context_type & io_context, TcpServiceBase * tcp_service, bool passtive, std::size_t identity);
+    TcpConnection(io_context_type & io_context, TcpServiceBase * tcp_service, bool passive, std::size_t identity);
     virtual ~TcpConnection() override;
 
 public:
     TcpConnection(const TcpConnection &) = delete;
+    TcpConnection(TcpConnection &&) = delete;
     TcpConnection & operator = (const TcpConnection &) = delete;
+    TcpConnection & operator = (TcpConnection &&) = delete;
 
 public:
     virtual void get_host_address(std::string & ip, unsigned short & port) override;
@@ -60,7 +62,6 @@ public:
     tcp_recv_buffer_type & recv_buffer();
     tcp_send_buffer_type & send_buffer();
     void start();
-    bool send(const void * data, std::size_t len);
 
 public:
     void handle_resolve(const boost::system::error_code & error, boost::asio::ip::tcp::resolver::iterator iterator, boost::asio::ip::tcp::endpoint host_endpoint, resolver_ptr resolver);
@@ -81,7 +82,7 @@ private:
     io_context_type                               & m_io_context;
     TcpServiceBase                                * m_tcp_service;
     bool                                            m_running;
-    bool                                            m_passtive;
+    bool                                            m_passive;
     std::size_t                                     m_identity;
     socket_type                                     m_socket;
     std::string                                     m_host_ip;
