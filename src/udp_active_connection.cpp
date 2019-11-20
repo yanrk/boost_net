@@ -89,24 +89,30 @@ void UdpActiveConnection::handle_resolve(const boost::system::error_code & error
         m_socket.close(connect_error_code);
         if (0 != host_endpoint.port() || !host_endpoint.address().is_unspecified())
         {
-            m_socket.open(host_endpoint.protocol(), connect_error_code);
-            if (connect_error_code)
+            try
             {
-                return;
+                m_socket.open(host_endpoint.protocol());
+                m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+                m_socket.bind(host_endpoint);
             }
-            m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true), connect_error_code);
-            if (connect_error_code)
+            catch (boost::system::error_code &)
             {
-                return;
-            }
-            m_socket.bind(host_endpoint, connect_error_code);
-            if (connect_error_code)
-            {
+                if (nullptr != m_udp_service)
+                {
+                    m_udp_service->on_connect(nullptr, m_identity);
+                }
                 return;
             }
         }
         boost::asio::ip::udp::endpoint peer_endpoint(*iterator++);
         m_socket.async_connect(peer_endpoint, boost::bind(&UdpActiveConnection::handle_connect, shared_from_this(), boost::asio::placeholders::error, iterator, host_endpoint, resolver));
+    }
+    else
+    {
+        if (nullptr != m_udp_service)
+        {
+            m_udp_service->on_connect(nullptr, m_identity);
+        }
     }
 }
 
