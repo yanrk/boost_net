@@ -80,7 +80,7 @@ public:
     virtual bool on_accept(TcpConnectionSharedPtr connection, unsigned short listener_port) = 0;
     virtual bool on_recv(TcpConnectionSharedPtr connection) = 0;
     virtual bool on_send(TcpConnectionSharedPtr connection) = 0;
-    virtual bool on_close(TcpConnectionSharedPtr connection) = 0;
+    virtual void on_close(TcpConnectionSharedPtr connection) = 0;
 };
 
 class TcpManagerImpl;
@@ -151,7 +151,7 @@ public:
     virtual bool on_accept(UdpConnectionSharedPtr connection, unsigned short listener_port) = 0;
     virtual bool on_recv(UdpConnectionSharedPtr connection) = 0;
     virtual bool on_send(UdpConnectionSharedPtr connection) = 0;
-    virtual bool on_close(UdpConnectionSharedPtr connection) = 0;
+    virtual void on_close(UdpConnectionSharedPtr connection) = 0;
 };
 
 class UdpManagerImpl;

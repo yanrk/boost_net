@@ -21,7 +21,7 @@ private:
     virtual bool on_accept(BoostNet::TcpConnectionSharedPtr connection, unsigned short listener_port) override;
     virtual bool on_recv(BoostNet::TcpConnectionSharedPtr connection) override;
     virtual bool on_send(BoostNet::TcpConnectionSharedPtr connection) override;
-    virtual bool on_close(BoostNet::TcpConnectionSharedPtr connection) override;
+    virtual void on_close(BoostNet::TcpConnectionSharedPtr connection) override;
 
 private:
     bool insert_connection(BoostNet::TcpConnectionSharedPtr connection);
@@ -39,7 +39,7 @@ private:
     virtual bool on_accept(BoostNet::UdpConnectionSharedPtr connection, unsigned short listener_port) override;
     virtual bool on_recv(BoostNet::UdpConnectionSharedPtr connection) override;
     virtual bool on_send(BoostNet::UdpConnectionSharedPtr connection) override;
-    virtual bool on_close(BoostNet::UdpConnectionSharedPtr connection) override;
+    virtual void on_close(BoostNet::UdpConnectionSharedPtr connection) override;
 
 private:
     bool insert_connection(BoostNet::UdpConnectionSharedPtr connection);

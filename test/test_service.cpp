@@ -66,9 +66,9 @@ bool TestService::on_send(BoostNet::TcpConnectionSharedPtr connection)
     return (true);
 }
 
-bool TestService::on_close(BoostNet::TcpConnectionSharedPtr connection)
+void TestService::on_close(BoostNet::TcpConnectionSharedPtr connection)
 {
-    return (remove_connection(connection));
+    remove_connection(connection);
 }
 
 bool TestService::insert_connection(BoostNet::TcpConnectionSharedPtr connection)
@@ -274,9 +274,9 @@ bool TestService::on_send(BoostNet::UdpConnectionSharedPtr connection)
     return (true);
 }
 
-bool TestService::on_close(BoostNet::UdpConnectionSharedPtr connection)
+void TestService::on_close(BoostNet::UdpConnectionSharedPtr connection)
 {
-    return (remove_connection(connection));
+    remove_connection(connection);
 }
 
 bool TestService::insert_connection(BoostNet::UdpConnectionSharedPtr connection)
