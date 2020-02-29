@@ -46,8 +46,8 @@ public:
     virtual bool recv_buffer_has_data() override;
     virtual const void * recv_buffer_data() override;
     virtual std::size_t recv_buffer_size() override;
-    virtual bool recv_buffer_drop_len(std::size_t len) override;
-    virtual bool send_buffer_fill_len(const void * data, std::size_t len) override;
+    virtual bool recv_buffer_drop() override;
+    virtual bool send_buffer_fill(const void * data, std::size_t len) override;
 
 public:
     virtual void close() override;

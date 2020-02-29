@@ -36,7 +36,6 @@ bool TestService::on_connect(BoostNet::TcpConnectionSharedPtr connection, std::s
     }
     else
     {
-        assert(false);
         return (false);
     }
 }
@@ -73,6 +72,10 @@ void TestService::on_close(BoostNet::TcpConnectionSharedPtr connection)
 
 bool TestService::insert_connection(BoostNet::TcpConnectionSharedPtr connection)
 {
+    if (!connection)
+    {
+        return (false);
+    }
     std::string host_ip;
     unsigned short host_port = 0;
     connection->get_host_address(host_ip, host_port);
@@ -126,7 +129,7 @@ bool TestService::send_message(BoostNet::TcpConnectionSharedPtr connection)
     std::size_t data_len = 2 + msg_len * count + 1;
 
     char head[2] = { static_cast<char>(data_len / 256U), static_cast<char>(data_len % 256U) };
-    if (!connection->send_buffer_fill_len(head, 2))
+    if (!connection->send_buffer_fill(head, 2))
     {
         assert(false);
         return (false);
@@ -134,7 +137,7 @@ bool TestService::send_message(BoostNet::TcpConnectionSharedPtr connection)
 
     for (std::size_t index = 0; index < count; ++index)
     {
-        if (!connection->send_buffer_fill_len(msg_blk, msg_len))
+        if (!connection->send_buffer_fill(msg_blk, msg_len))
         {
             assert(false);
             return (false);
@@ -142,7 +145,7 @@ bool TestService::send_message(BoostNet::TcpConnectionSharedPtr connection)
     }
 
     char tail[1] = { 0x00 };
-    if (!connection->send_buffer_fill_len(tail, 1))
+    if (!connection->send_buffer_fill(tail, 1))
     {
         assert(false);
         return (false);
@@ -178,7 +181,7 @@ bool TestService::recv_message(BoostNet::TcpConnectionSharedPtr connection)
         return (false);
     }
 
-    if (!connection->recv_buffer_drop_len(need_len))
+    if (!connection->recv_buffer_drop(need_len))
     {
         assert(false);
         return (false);
@@ -281,6 +284,10 @@ void TestService::on_close(BoostNet::UdpConnectionSharedPtr connection)
 
 bool TestService::insert_connection(BoostNet::UdpConnectionSharedPtr connection)
 {
+    if (!connection)
+    {
+        return (false);
+    }
     std::string host_ip;
     unsigned short host_port = 0;
     connection->get_host_address(host_ip, host_port);
@@ -331,7 +338,7 @@ bool TestService::send_message(BoostNet::UdpConnectionSharedPtr connection)
 
     ++count;
 
-    if (!connection->send_buffer_fill_len(msg_blk, msg_len))
+    if (!connection->send_buffer_fill(msg_blk, msg_len))
     {
         assert(false);
         return (false);
@@ -361,7 +368,7 @@ bool TestService::recv_message(BoostNet::UdpConnectionSharedPtr connection)
         return (false);
     }
 
-    if (!connection->recv_buffer_drop_len(data_len))
+    if (!connection->recv_buffer_drop())
     {
         assert(false);
         return (false);

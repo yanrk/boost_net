@@ -123,13 +123,9 @@ std::size_t UdpPassiveConnection::recv_buffer_size()
     return (m_recv_buffer.front().size());
 }
 
-bool UdpPassiveConnection::recv_buffer_drop_len(std::size_t len)
+bool UdpPassiveConnection::recv_buffer_drop()
 {
     if (m_recv_buffer.empty())
-    {
-        return (false);
-    }
-    if (m_recv_buffer.front().size() != len)
     {
         return (false);
     }
@@ -137,7 +133,7 @@ bool UdpPassiveConnection::recv_buffer_drop_len(std::size_t len)
     return (true);
 }
 
-bool UdpPassiveConnection::send_buffer_fill_len(const void * data, std::size_t len)
+bool UdpPassiveConnection::send_buffer_fill(const void * data, std::size_t len)
 {
     if (nullptr == data && 0 != len)
     {

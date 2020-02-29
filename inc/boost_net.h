@@ -53,11 +53,11 @@ public:
 public:
     virtual const void * recv_buffer_data() = 0;
     virtual std::size_t recv_buffer_size() = 0;
-    virtual bool recv_buffer_copy_len(void * buf, std::size_t len) = 0;
-    virtual bool recv_buffer_move_len(void * buf, std::size_t len) = 0;
-    virtual bool recv_buffer_drop_len(std::size_t len) = 0;
+    virtual bool recv_buffer_copy(void * buf, std::size_t len) = 0;
+    virtual bool recv_buffer_move(void * buf, std::size_t len) = 0;
+    virtual bool recv_buffer_drop(std::size_t len) = 0;
     virtual void recv_buffer_water_mark(std::size_t len) = 0;
-    virtual bool send_buffer_fill_len(const void * data, std::size_t len) = 0;
+    virtual bool send_buffer_fill(const void * data, std::size_t len) = 0;
 
 public:
     virtual void close() = 0;
@@ -127,8 +127,8 @@ public:
     virtual bool recv_buffer_has_data() = 0;
     virtual const void * recv_buffer_data() = 0;
     virtual std::size_t recv_buffer_size() = 0;
-    virtual bool recv_buffer_drop_len(std::size_t len) = 0;
-    virtual bool send_buffer_fill_len(const void * data, std::size_t len) = 0;
+    virtual bool recv_buffer_drop() = 0;
+    virtual bool send_buffer_fill(const void * data, std::size_t len) = 0;
 
 public:
     virtual void close() = 0;

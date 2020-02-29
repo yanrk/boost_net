@@ -284,7 +284,7 @@ std::size_t TcpConnection::recv_buffer_size()
     return (m_recv_buffer.size());
 }
 
-bool TcpConnection::recv_buffer_copy_len(void * buf, std::size_t len)
+bool TcpConnection::recv_buffer_copy(void * buf, std::size_t len)
 {
     if (nullptr == buf || m_recv_buffer.size() < len)
     {
@@ -294,7 +294,7 @@ bool TcpConnection::recv_buffer_copy_len(void * buf, std::size_t len)
     return (true);
 }
 
-bool TcpConnection::recv_buffer_move_len(void * buf, std::size_t len)
+bool TcpConnection::recv_buffer_move(void * buf, std::size_t len)
 {
     if (nullptr == buf || m_recv_buffer.size() < len)
     {
@@ -305,7 +305,7 @@ bool TcpConnection::recv_buffer_move_len(void * buf, std::size_t len)
     return (true);
 }
 
-bool TcpConnection::recv_buffer_drop_len(std::size_t len)
+bool TcpConnection::recv_buffer_drop(std::size_t len)
 {
     if (m_recv_buffer.size() < len)
     {
@@ -320,7 +320,7 @@ void TcpConnection::recv_buffer_water_mark(std::size_t len)
     m_recv_water_mark = len;
 }
 
-bool TcpConnection::send_buffer_fill_len(const void * data, std::size_t len)
+bool TcpConnection::send_buffer_fill(const void * data, std::size_t len)
 {
     if (nullptr == data)
     {

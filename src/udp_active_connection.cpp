@@ -250,13 +250,9 @@ std::size_t UdpActiveConnection::recv_buffer_size()
     return (m_recv_buffer.front().size());
 }
 
-bool UdpActiveConnection::recv_buffer_drop_len(std::size_t len)
+bool UdpActiveConnection::recv_buffer_drop()
 {
     if (m_recv_buffer.empty())
-    {
-        return (false);
-    }
-    if (m_recv_buffer.front().size() != len)
     {
         return (false);
     }
@@ -264,7 +260,7 @@ bool UdpActiveConnection::recv_buffer_drop_len(std::size_t len)
     return (true);
 }
 
-bool UdpActiveConnection::send_buffer_fill_len(const void * data, std::size_t len)
+bool UdpActiveConnection::send_buffer_fill(const void * data, std::size_t len)
 {
     if (nullptr == data && 0 != len)
     {
