@@ -72,7 +72,7 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
    }
    ```
 
-   - if the **TestService**  is a server (others will connect to its tcp ports, or send to its udp ports actively)
+   - if the **TestService**  is a **server** (others will connect to its tcp ports, or send to its udp ports actively)
 
      ```c++
      bool TestService::init()
@@ -97,7 +97,7 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
 
      
 
-   - if the **TestService** is a pure client (only connect to other's tcp ports, and send to other's udp ports actively)
+   - if the **TestService** is a pure **client** (only connect to other's tcp ports, and send to other's udp ports actively)
 
      ```c++
      bool TestService::init()
@@ -257,17 +257,34 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
          /* maybe we want to reconnect */
          if (11111 = identity) /* it is the first tcp connection close */
          {
+             m_tcp_connection_1.reset();
              m_tcp_manager.create_connection("172.16.4.33", 9001, false, 11111); 
          }
          else if (22222 = identity) /* it is the second tcp connection close */
          {
+             m_tcp_connection_2.reset();
              m_tcp_manager.create_connection("172.16.4.33", 9002, false, 22222); 
          }
      }
      
      void TestService::on_close(BoostNet::UdpConnectionSharedPtr connection)
      {
-         ... // maybe we handle the udp connection same as tcp connection callback
+         /*
+          * maybe we handle the udp connection same as tcp connection callback
+          * but we handle it with another way
+          */
+         assert(!!connection);
+         /* maybe we want to reconnect */
+         if (connection == m_udp_connection_1) /* it is the first udp connection close */
+         {
+             m_udp_connection_1.reset();
+             m_udp_manager.create_connection("192.168.1.113", 9011, false, 33333); 
+         }
+         else if (connection == m_udp_connection_2) /* it is the second udp connection close */
+         {
+             m_udp_connection_2.reset();
+             m_udp_manager.create_connection("192.168.1.113", 9012, false, 44444); 
+         }
      }
      ```
 
@@ -373,6 +390,31 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
    }
    ```
 
-10. 
+10. Note that each **callback** for each connection is **blocked**, so don't do anything too time-consuming within the callback
 
-11. 
+11. Note that each **callback** for each connection is **mutually exclusive**, so  we need not any mutex to protect it, but if we save the *connection* as a member variable and use it in non-callback functions (meaning other threads), pay attention to the usage of smart pointer member variable
+
+    ```c++
+    {
+        /* 1, bad way to use smart pointer member variable */
+        if (!!m_tcp_connection_1)
+        {
+            /*
+             * maybe on_close(connection) called at the same time
+             * and m_tcp_connection_1.reset() been called there
+             * the next operate will get a bomb
+             */
+            m_tcp_connection_1->send_buffer_fill_len("hello", 5);
+        }
+        
+        /* 2, right way to use smart pointer member variable */
+        BoostNet::TcpConnectionSharedPtr connection = m_tcp_connection_1;
+        if (!!connection)
+        {
+            connection->send_buffer_fill_len("hello", 5);
+        } 
+    }
+    ```
+
+    
+
