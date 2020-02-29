@@ -465,4 +465,5 @@ bool TestService::init()
 void TestService::exit()
 {
     m_tcp_manager.exit();
+    m_udp_manager.exit();
 }
