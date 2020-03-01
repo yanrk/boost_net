@@ -117,7 +117,7 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
    - easy to connect the other server
 
      ```c++
-    {
+     {
          const char * tcp_host = "172.16.4.33";
          bool tcp_sync_connect = false;
          
