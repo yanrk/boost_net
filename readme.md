@@ -14,7 +14,7 @@
 
 
 
-## Use It
+## usage
 
 the file *test/test_service.h* has show you how to use it, and a quick explanation here
 
@@ -95,12 +95,10 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
      }
      ```
 
-     
-
    - if the **TestService** is a pure **client** (only connect to other's tcp ports, and send to other's udp ports actively)
 
      ```c++
-     bool TestService::init()
+    bool TestService::init()
      {
          if (!m_tcp_manager.init(this, 5))
          {
@@ -115,23 +113,23 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
          return (true);
      }
      ```
-
+   
    - easy to connect the other server
 
-     ```
-     {
+     ```c++
+    {
          const char * tcp_host = "172.16.4.33";
          bool tcp_sync_connect = false;
          
          unsigned short tcp_port_1 = 9001;
-         bool tcp_identity_1 = 11111; /* when you need to identify the connection */
+         std::size_t tcp_identity_1 = 11111; /* when you need to identify the connection */
          if (!m_tcp_manager.create_connection(tcp_host, tcp_port_1, tcp_sync_connect, tcp_identity_1))
          {
              return (false);
          }
      
          unsigned short tcp_port_2 = 9002;
-         bool tcp_identity_2 = 22222; /* when you need to identify the connection */
+         std::size_t tcp_identity_2 = 22222; /* when you need to identify the connection */
          if (!m_tcp_manager.create_connection(tcp_host, tcp_port_2, tcp_sync_connect, tcp_identity_2))
          {
              return (false);
@@ -141,14 +139,14 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
          bool udp_sync_connect = false;
          
          unsigned short udp_port_1 = 9011;
-         bool udp_identity_1 = 33333; /* when you need to identify the connection */
+         std::size_t udp_identity_1 = 33333; /* when you need to identify the connection */
          if (!m_udp_manager.create_connection(udp_host, udp_port_1, udp_sync_connect, udp_identity_1))
          {
              return (false);
          }
          
          unsigned short udp_port_2 = 9012;
-         bool udp_identity_2 = 44444; /* when you need to identify the connection */
+         std::size_t udp_identity_2 = 44444; /* when you need to identify the connection */
          if (!m_udp_manager.create_connection(udp_host, udp_port_2, udp_sync_connect, udp_identity_2))
          {
              return (false);
@@ -157,20 +155,18 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
          return (true);
      }
      ```
-
-     
-
+   
    - easy to stop **TestService**
 
      ```c++
-     void TestService::exit()
+    void TestService::exit()
      {
          m_tcp_manager.exit();
          m_udp_manager.exit();
      }
      ```
-
-5. when **client** active-connect complete , **on_connect**(*connection*, *identity*) will callback, *identity* identify which connect-operation, if *connection* is *nullptr* means connect failed, **Note** that the **return value is very important**, if return false means that the current connection is abandoned, which is equivalent to calling *connection->close()* implicitly
+   
+5. when **client** active-connect complete , **on_connect**(*connection*, *identity*) will callback, *identity* identify which connect-operation, if *connection* is *nullptr* means connect failed, **note** that the **return value is very important**, if return false means that the current connection is abandoned, which is equivalent to calling *connection->close()* implicitly
 
    ```c++
    bool TestService::on_connect(BoostNet::TcpConnectionSharedPtr connection, std::size_t identity)
@@ -178,13 +174,17 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
        if (!connection)
        {
            /* maybe we want retry, async-connect is better than sync-connect at here */
-           if (11111 = identity) /* the first tcp connect operate failed */
+           if (11111 == identity) /* the first tcp connect operate failed */
            {
                m_tcp_manager.create_connection("172.16.4.33", 9001, false, 11111); 
            }
-           else if (22222 = identity) /* the second tcp connect operate failed */
+           else if (22222 == identity) /* the second tcp connect operate failed */
            {
                m_tcp_manager.create_connection("172.16.4.33", 9002, false, 22222); 
+           }
+           else
+           {
+               assert(false); /* unknown connection, never come here */
            }
            return (false);
        }
@@ -194,11 +194,11 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
            connection->set_user_data(reinterpret_cast<void *>(identity));
             
            /* also we can store connection with a member variable */
-           if (11111 = identity) /* the first tcp connect operate success */
+           if (11111 == identity) /* the first tcp connect operate success */
            {
                m_tcp_connection_1 = connection;
            }
-           else if (22222 = identity) /* the second tcp connect operate success */
+           else if (22222 == identity) /* the second tcp connect operate success */
            {
                m_tcp_connection_2 = connection;
            }
@@ -216,7 +216,7 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
    }
    ```
 
-6. when **TestService** is a **server**, and others connect to its bind-ports, **on_accept**(*connection*, *listener_port*) will callback, *listener_port* identify which port connect from, the *connection* never be *nullptr* here, **Note** that the **return value is very important**, if return false means that the current connection is abandoned, which is equivalent to calling *connection->close()* implicitly
+6. when **TestService** is a **server**, and others connect to its bind-ports, **on_accept**(*connection*, *listener_port*) will callback, *listener_port* identify which port connect from, the *connection* never be *nullptr* here, **note** that the **return value is very important**, if return false means that the current connection is abandoned, which is equivalent to calling *connection->close()* implicitly
 
    ```c++
    bool TestService::on_accept(BoostNet::TcpConnectionSharedPtr connection, unsigned short listener_port)
@@ -255,15 +255,19 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
          /* we have stored identity as a user data before, now can load it */
          std::size_t identity = reinterpret_cast(connection->get_user_data());
          /* maybe we want to reconnect */
-         if (11111 = identity) /* it is the first tcp connection close */
+         if (11111 == identity) /* it is the first tcp connection close */
          {
              m_tcp_connection_1.reset();
              m_tcp_manager.create_connection("172.16.4.33", 9001, false, 11111); 
          }
-         else if (22222 = identity) /* it is the second tcp connection close */
+         else if (22222 == identity) /* it is the second tcp connection close */
          {
              m_tcp_connection_2.reset();
              m_tcp_manager.create_connection("172.16.4.33", 9002, false, 22222); 
+         }
+         else
+         {
+             assert(false); /* unknown connection, never come here */
          }
      }
      
@@ -285,21 +289,28 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
              m_udp_connection_2.reset();
              m_udp_manager.create_connection("192.168.1.113", 9012, false, 44444); 
          }
+        else
+         {
+             assert(false); /* unknown connection, never come here */
+         }
      }
      ```
-
+   
    - if **TestService** is **server** maybe we do like this
-
+   
      ```c++
      void TestService::on_close(BoostNet::TcpConnectionSharedPtr connection)
      {
          assert(!!connection);
          /* maybe we need decrease the number of connections on each listener port */
-         if (10001 == listener_port)
+         std::string host_ip;
+         unsigned short host_port = 0;
+         connection->get_host_address(host_ip, host_port);
+         if (10001 == host_port)
          {
              --m_tcp_port_count_1;
          }
-         else if (10002 == listener_port)
+         else if (10002 == host_port)
          {
              --m_tcp_port_count_2;
          }
@@ -314,10 +325,8 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
          ... // maybe we handle the udp connection same as tcp connection callback
      }
      ```
-
-     
-
-8. when received any new data, **on_recv**(*connection*) will callback, the *connection* never be *nullptr* here, **Note** that the **return value is very important**, if return false means that the current connection is abandoned, which is equivalent to calling *connection->close()* implicitly
+   
+8. when received any new data, **on_recv**(*connection*) will callback, the *connection* never be *nullptr* here, **note** that the **return value is very important**, if return false means that the current connection is abandoned, which is equivalent to calling *connection->close()* implicitly
 
    ```c++
    bool TestService::on_recv(BoostNet::TcpConnectionSharedPtr connection)
@@ -349,10 +358,10 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
    bool TestService::on_recv(BoostNet::UdpConnectionSharedPtr connection)
    {
        /*
-        * use ‘connection->recv_buffer_has_data()’ to check whether has more data
-        * use ‘connection->recv_buffer_data()’ to get first frame data point
-        * use ‘connection->recv_buffer_size()’ to get first frame data size
-        * use ‘connection->recv_buffer_drop()’ to drop first frame data
+        * use ‘connection->recv_buffer_has_data()’ to check whether has more frame data
+        * use ‘connection->recv_buffer_data()’ to get the first frame data point
+        * use ‘connection->recv_buffer_size()’ to get the first frame data size
+        * use ‘connection->recv_buffer_drop()’ to drop the first frame data
         * use ‘connection->send_buffer_fill(data, len)’ to send frame data
         */
        assert(!!connection);
@@ -374,7 +383,7 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
    }
    ```
    
-9. when all data has sent complete, **on_send**(*connection*) will callback, the *connection* never be *nullptr* here, **Note** that the **return value is very important**, if return false means that the current connection is abandoned, which is equivalent to calling *connection->close()* implicitly, so mostly we just return true 
+9. when all data has sent complete, **on_send**(*connection*) will callback, the *connection* never be *nullptr* here, **note** that the **return value is very important**, if return false means that the current connection is abandoned, which is equivalent to calling *connection->close()* implicitly, so mostly we just return true 
 
    ```c++
    bool TestService::on_send(BoostNet::TcpConnectionSharedPtr connection)
@@ -390,9 +399,9 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
    }
    ```
 
-10. Note that each **callback** for each connection is **blocked**, so don't do anything too time-consuming within the callback
+10. **note** that each **callback** for each connection is **blocked**, so don't do anything too time-consuming within the callback
 
-11. Note that each **callback** for each connection is **mutually exclusive**, so  we need not any mutex to protect it, but if we save the *connection* as a member variable and use it in non-callback functions (meaning other threads), pay attention to the usage of smart pointer member variable
+11. **note** that each **callback** for each connection is **mutually exclusive**, so  we need not any mutex to protect it, but if we save the *connection* as a member variable and use it in non-callback functions (meaning other threads), pay attention to the usage of smart pointer member variable
 
     ```c++
     {
@@ -404,14 +413,14 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
              * and m_tcp_connection_1.reset() been called there
              * the next operate will get a bomb
              */
-            m_tcp_connection_1->send_buffer_fill_len("hello", 5);
+            m_tcp_connection_1->send_buffer_fill("hello", 5);
         }
         
         /* 2, right way to use smart pointer member variable */
         BoostNet::TcpConnectionSharedPtr connection = m_tcp_connection_1;
         if (!!connection)
         {
-            connection->send_buffer_fill_len("hello", 5);
+            connection->send_buffer_fill("hello", 5);
         } 
     }
     ```
