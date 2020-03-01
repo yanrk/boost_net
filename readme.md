@@ -98,7 +98,7 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
    - if the **TestService** is a pure **client** (only connect to other's tcp ports, and send to other's udp ports actively)
 
      ```c++
-    bool TestService::init()
+     bool TestService::init()
      {
          if (!m_tcp_manager.init(this, 5))
          {
@@ -159,7 +159,7 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
    - easy to stop **TestService**
 
      ```c++
-    void TestService::exit()
+     void TestService::exit()
      {
          m_tcp_manager.exit();
          m_udp_manager.exit();
@@ -289,7 +289,7 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
              m_udp_connection_2.reset();
              m_udp_manager.create_connection("192.168.1.113", 9012, false, 44444); 
          }
-        else
+         else
          {
              assert(false); /* unknown connection, never come here */
          }
