@@ -8,11 +8,12 @@
 static const char msg_blk[] = "this is a message\n";
 static const std::size_t msg_len = sizeof(msg_blk) / sizeof(msg_blk[0]) - 1;
 
-TestService::TestService(bool use_tcp, bool requester, std::size_t send_times, std::size_t connection_count)
+TestService::TestService(bool use_tcp, bool requester, bool sync_connect, std::size_t send_times, std::size_t connect_count)
     : m_use_tcp(use_tcp)
     , m_requester(requester)
-    , m_max_msg_cnt(std::min(use_tcp ? send_times : send_times + 1, (65536 - 2 - 1) / msg_len))
-    , m_max_connection_cnt(connection_count)
+    , m_sync_connect(sync_connect)
+    , m_max_message_count(std::min(use_tcp ? send_times : send_times + 1, (65536 - 2 - 1) / msg_len))
+    , m_max_connect_count(connect_count)
     , m_connect_count(0)
     , m_disconnect_count(0)
     , m_send_finish_count(0)
@@ -97,7 +98,7 @@ bool TestService::remove_connection(BoostNet::TcpConnectionSharedPtr connection)
     connection->get_peer_address(peer_ip, peer_port);
     printf("disconnect: %u, [%s:%u] -> [%s:%u]\n", static_cast<uint32_t>(++m_disconnect_count), host_ip.c_str(), host_port, peer_ip.c_str(), peer_port);
     std::size_t count = reinterpret_cast<std::size_t>(connection->get_user_data());
-    if (count < m_max_msg_cnt)
+    if (count < m_max_message_count)
     {
         assert(false);
     }
@@ -106,13 +107,13 @@ bool TestService::remove_connection(BoostNet::TcpConnectionSharedPtr connection)
 
 bool TestService::send_message(BoostNet::TcpConnectionSharedPtr connection)
 {
-    if (0 == m_max_msg_cnt)
+    if (0 == m_max_message_count)
     {
         return (true);
     }
 
     std::size_t count = reinterpret_cast<std::size_t>(connection->get_user_data());
-    if (count >= m_max_msg_cnt)
+    if (count >= m_max_message_count)
     {
         std::string host_ip;
         unsigned short host_port = 0;
@@ -158,7 +159,7 @@ bool TestService::send_message(BoostNet::TcpConnectionSharedPtr connection)
 
 bool TestService::recv_message(BoostNet::TcpConnectionSharedPtr connection)
 {
-    assert(0 != m_max_msg_cnt);
+    assert(0 != m_max_message_count);
 
     const char * data = reinterpret_cast<const char *>(connection->recv_buffer_data());
     std::size_t data_len = connection->recv_buffer_size();
@@ -201,7 +202,7 @@ bool TestService::recv_message(BoostNet::TcpConnectionSharedPtr connection)
 bool TestService::check_message(BoostNet::TcpConnectionSharedPtr connection, const char * data, std::size_t data_len)
 {
     std::size_t count = reinterpret_cast<std::size_t>(connection->get_user_data());
-    if (count >= m_max_msg_cnt)
+    if (count >= m_max_message_count)
     {
         assert(false);
         return (false);
@@ -309,7 +310,7 @@ bool TestService::remove_connection(BoostNet::UdpConnectionSharedPtr connection)
     connection->get_peer_address(peer_ip, peer_port);
     printf("disconnect: %u, [%s:%u] -> [%s:%u]\n", static_cast<uint32_t>(++m_disconnect_count), host_ip.c_str(), host_port, peer_ip.c_str(), peer_port);
     std::size_t count = reinterpret_cast<std::size_t>(connection->get_user_data());
-    if (count < m_max_msg_cnt)
+    if (count < m_max_message_count)
     {
         assert(false);
     }
@@ -318,13 +319,13 @@ bool TestService::remove_connection(BoostNet::UdpConnectionSharedPtr connection)
 
 bool TestService::send_message(BoostNet::UdpConnectionSharedPtr connection)
 {
-    if (0 == m_max_msg_cnt)
+    if (0 == m_max_message_count)
     {
         return (true);
     }
 
     std::size_t count = reinterpret_cast<std::size_t>(connection->get_user_data());
-    if (count >= m_max_msg_cnt)
+    if (count >= m_max_message_count)
     {
         std::string host_ip;
         unsigned short host_port = 0;
@@ -351,7 +352,7 @@ bool TestService::send_message(BoostNet::UdpConnectionSharedPtr connection)
 
 bool TestService::recv_message(BoostNet::UdpConnectionSharedPtr connection)
 {
-    assert(0 != m_max_msg_cnt);
+    assert(0 != m_max_message_count);
 
     if (!connection->recv_buffer_has_data())
     {
@@ -392,7 +393,7 @@ bool TestService::recv_message(BoostNet::UdpConnectionSharedPtr connection)
 bool TestService::check_message(BoostNet::UdpConnectionSharedPtr connection, const char * data, std::size_t data_len)
 {
     std::size_t count = reinterpret_cast<std::size_t>(connection->get_user_data());
-    if (count >= m_max_msg_cnt)
+    if (count >= m_max_message_count)
     {
         assert(false);
         return (false);
@@ -421,9 +422,9 @@ bool TestService::init()
             {
                 return (false);
             }
-            for (std::size_t index = 0; index < m_max_connection_cnt; ++index)
+            for (std::size_t index = 0; index < m_max_connect_count; ++index)
             {
-                if (!m_tcp_manager.create_connection("127.0.0.1", 12345, false))
+                if (!m_tcp_manager.create_connection("127.0.0.1", 12345, m_sync_connect))
                 {
                     return (false);
                 }
@@ -448,9 +449,9 @@ bool TestService::init()
             {
                 return (false);
             }
-            for (std::size_t index = 0; index < m_max_connection_cnt; ++index)
+            for (std::size_t index = 0; index < m_max_connect_count; ++index)
             {
-                if (!m_udp_manager.create_connection("127.0.0.1", 12345, false))
+                if (!m_udp_manager.create_connection("127.0.0.1", 12345, m_sync_connect))
                 {
                     return (false);
                 }
@@ -473,4 +474,16 @@ void TestService::exit()
 {
     m_tcp_manager.exit();
     m_udp_manager.exit();
+}
+
+TestServer::TestServer(bool use_tcp, std::size_t send_times)
+    : TestService(use_tcp, false, false, send_times, 0)
+{
+
+}
+
+TestClient::TestClient(bool use_tcp, bool sync_connect, std::size_t send_times, std::size_t connect_count)
+    : TestService(use_tcp, true, sync_connect, send_times, connect_count)
+{
+
 }

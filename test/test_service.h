@@ -9,7 +9,7 @@
 class TestService : public BoostNet::TcpServiceBase, public BoostNet::UdpServiceBase
 {
 public:
-    TestService(bool use_tcp, bool requester, std::size_t send_times, std::size_t connection_count);
+    TestService(bool use_tcp, bool requester, bool sync_connect, std::size_t send_times, std::size_t connect_count);
     virtual ~TestService();
 
 public:
@@ -55,13 +55,26 @@ private:
 private:
     bool                                                        m_use_tcp;
     bool                                                        m_requester;
-    std::size_t                                                 m_max_msg_cnt;
-    std::size_t                                                 m_max_connection_cnt;
+    bool                                                        m_sync_connect;
+    std::size_t                                                 m_max_message_count;
+    std::size_t                                                 m_max_connect_count;
     std::atomic_long                                            m_connect_count;
     std::atomic_long                                            m_disconnect_count;
     std::atomic_long                                            m_send_finish_count;
     BoostNet::TcpManager                                        m_tcp_manager;
     BoostNet::UdpManager                                        m_udp_manager;
+};
+
+class TestServer : public TestService
+{
+public:
+    TestServer(bool use_tcp, std::size_t send_times);
+};
+
+class TestClient : public TestService
+{
+public:
+    TestClient(bool use_tcp, bool sync_connect, std::size_t send_times, std::size_t connection_count);
 };
 
 
