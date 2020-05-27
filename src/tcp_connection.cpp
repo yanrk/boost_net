@@ -34,7 +34,7 @@ void * TcpConnectionBase::get_user_data()
     return (m_user_data);
 }
 
-TcpConnection::TcpConnection(io_context_type & io_context, TcpServiceBase * tcp_service, bool passive, std::size_t identity)
+TcpConnection::TcpConnection(io_context_type & io_context, TcpServiceBase * tcp_service, bool passive, const void * identity)
     : m_io_context(io_context)
     , m_tcp_service(tcp_service)
     , m_running(false)
@@ -91,7 +91,7 @@ void TcpConnection::start()
     {
         if (nullptr != m_tcp_service)
         {
-            if (!m_tcp_service->on_accept(shared_from_this(), static_cast<unsigned short>(m_identity)))
+            if (!m_tcp_service->on_accept(shared_from_this(), static_cast<unsigned short>(reinterpret_cast<uint64_t>(m_identity))))
             {
                 close();
                 return;

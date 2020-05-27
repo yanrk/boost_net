@@ -14,7 +14,7 @@
 
 namespace BoostNet { // namespace BoostNet begin
 
-UdpActiveConnection::UdpActiveConnection(io_context_type & io_context, UdpServiceBase * udp_service, std::size_t identity)
+UdpActiveConnection::UdpActiveConnection(io_context_type & io_context, UdpServiceBase * udp_service, const void * identity)
     : m_io_context(io_context)
     , m_udp_service(udp_service)
     , m_running(false)

@@ -17,7 +17,7 @@ public:
     void exit();
 
 private:
-    virtual bool on_connect(BoostNet::TcpConnectionSharedPtr connection, std::size_t identity) override;
+    virtual bool on_connect(BoostNet::TcpConnectionSharedPtr connection, const void * identity) override;
     virtual bool on_accept(BoostNet::TcpConnectionSharedPtr connection, unsigned short listener_port) override;
     virtual bool on_recv(BoostNet::TcpConnectionSharedPtr connection) override;
     virtual bool on_send(BoostNet::TcpConnectionSharedPtr connection) override;
@@ -35,7 +35,7 @@ private:
     bool recv_message(BoostNet::TcpConnectionSharedPtr connection);
 
 private:
-    virtual bool on_connect(BoostNet::UdpConnectionSharedPtr connection, std::size_t identity) override;
+    virtual bool on_connect(BoostNet::UdpConnectionSharedPtr connection, const void * identity) override;
     virtual bool on_accept(BoostNet::UdpConnectionSharedPtr connection, unsigned short listener_port) override;
     virtual bool on_recv(BoostNet::UdpConnectionSharedPtr connection) override;
     virtual bool on_send(BoostNet::UdpConnectionSharedPtr connection) override;

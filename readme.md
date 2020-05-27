@@ -31,14 +31,14 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
    {
        ...
    private: /* TcpServiceBase */
-       virtual bool on_connect(BoostNet::TcpConnectionSharedPtr connection, std::size_t identity) override;
+       virtual bool on_connect(BoostNet::TcpConnectionSharedPtr connection, const void * identity) override;
        virtual bool on_accept(BoostNet::TcpConnectionSharedPtr connection, unsigned short listener_port) override;
        virtual bool on_recv(BoostNet::TcpConnectionSharedPtr connection) override;
        virtual bool on_send(BoostNet::TcpConnectionSharedPtr connection) override;
        virtual void on_close(BoostNet::TcpConnectionSharedPtr connection) override;
        
    private: /* UdpServiceBase */
-       virtual bool on_connect(BoostNet::UdpConnectionSharedPtr connection, std::size_t identity) override;
+       virtual bool on_connect(BoostNet::UdpConnectionSharedPtr connection, const void * identity) override;
        virtual bool on_accept(BoostNet::UdpConnectionSharedPtr connection, unsigned short listener_port) override;
        virtual bool on_recv(BoostNet::UdpConnectionSharedPtr connection) override;
        virtual bool on_send(BoostNet::UdpConnectionSharedPtr connection) override;
@@ -77,16 +77,18 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
      ```c++
      bool TestService::init()
      {
+         const char * tcp_host = "0.0.0.0";
          unsigned short tcp_port_array[] = { 10001, 10002 };
          std::size_t tcp_port_count = sizeof(tcp_port_array) / sizeof(tcp_port_array[0]);
-         if (!m_tcp_manager.init(this, 5, tcp_port_array, tcp_port_count))
+         if (!m_tcp_manager.init(this, 5, tcp_host, tcp_port_array, tcp_port_count))
          {
              return (false);
          }
      
+         const char * udp_host = "0.0.0.0";
          unsigned short udp_port_array[] = { 20001, 20002 };
          std::size_t udp_port_count = sizeof(udp_port_array) / sizeof(udp_port_array[0]);
-         if (!m_udp_manager.init(this, 5, udp_port_array, udp_port_count))
+         if (!m_udp_manager.init(this, 5, udp_host, udp_port_array, udp_port_count))
          {
              return (false);
          }
@@ -123,14 +125,14 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
          
          unsigned short tcp_port_1 = 9001;
          std::size_t tcp_identity_1 = 11111; /* when you need to identify the connection */
-         if (!m_tcp_manager.create_connection(tcp_host, tcp_port_1, tcp_sync_connect, tcp_identity_1))
+         if (!m_tcp_manager.create_connection(tcp_host, tcp_port_1, tcp_sync_connect, reinterpret_cast<const void *>(tcp_identity_1)))
          {
              return (false);
          }
      
          unsigned short tcp_port_2 = 9002;
          std::size_t tcp_identity_2 = 22222; /* when you need to identify the connection */
-         if (!m_tcp_manager.create_connection(tcp_host, tcp_port_2, tcp_sync_connect, tcp_identity_2))
+         if (!m_tcp_manager.create_connection(tcp_host, tcp_port_2, tcp_sync_connect, reinterpret_cast<const void *>(tcp_identity_2)))
          {
              return (false);
          }
@@ -140,14 +142,14 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
          
          unsigned short udp_port_1 = 9011;
          std::size_t udp_identity_1 = 33333; /* when you need to identify the connection */
-         if (!m_udp_manager.create_connection(udp_host, udp_port_1, udp_sync_connect, udp_identity_1))
+         if (!m_udp_manager.create_connection(udp_host, udp_port_1, udp_sync_connect, reinterpret_cast<const void *>(udp_identity_1)))
          {
              return (false);
          }
          
          unsigned short udp_port_2 = 9012;
          std::size_t udp_identity_2 = 44444; /* when you need to identify the connection */
-         if (!m_udp_manager.create_connection(udp_host, udp_port_2, udp_sync_connect, udp_identity_2))
+         if (!m_udp_manager.create_connection(udp_host, udp_port_2, udp_sync_connect, reinterpret_cast<const void *>(udp_identity_2)))
          {
              return (false);
          }
@@ -169,18 +171,18 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
 5. when **client** active-connect complete , **on_connect**(*connection*, *identity*) will callback, *identity* identify which connect-operation, if *connection* is *nullptr* means connect failed, **note** that the **return value is very important**, if return false means that the current connection is abandoned, which is equivalent to calling *connection->close()* implicitly
 
    ```c++
-   bool TestService::on_connect(BoostNet::TcpConnectionSharedPtr connection, std::size_t identity)
+   bool TestService::on_connect(BoostNet::TcpConnectionSharedPtr connection, const void * identity)
    {
        if (!connection)
        {
            /* maybe we want retry, async-connect is better than sync-connect at here */
-           if (11111 == identity) /* the first tcp connect operate failed */
+           if (reinterpret_cast<const void *>(11111) == identity) /* the first tcp connect operate failed */
            {
-               m_tcp_manager.create_connection("172.16.4.33", 9001, false, 11111); 
+               m_tcp_manager.create_connection("172.16.4.33", 9001, false, identity); 
            }
-           else if (22222 == identity) /* the second tcp connect operate failed */
+           else if (reinterpret_cast<const void *>(22222) == identity) /* the second tcp connect operate failed */
            {
-               m_tcp_manager.create_connection("172.16.4.33", 9002, false, 22222); 
+               m_tcp_manager.create_connection("172.16.4.33", 9002, false, identity); 
            }
            else
            {
@@ -194,11 +196,11 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
            connection->set_user_data(reinterpret_cast<void *>(identity));
             
            /* also we can store connection with a member variable */
-           if (11111 == identity) /* the first tcp connect operate success */
+           if (reinterpret_cast<const void *>(11111) == identity) /* the first tcp connect operate success */
            {
                m_tcp_connection_1 = connection;
            }
-           else if (22222 == identity) /* the second tcp connect operate success */
+           else if (reinterpret_cast<const void *>(22222) == identity) /* the second tcp connect operate success */
            {
                m_tcp_connection_2 = connection;
            }
@@ -210,7 +212,7 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
        }
    }
    
-   bool TestService::on_connect(BoostNet::UdpConnectionSharedPtr connection, std::size_t identity)
+   bool TestService::on_connect(BoostNet::UdpConnectionSharedPtr connection, const void * identity)
    {
        ... // handle the udp connection same as tcp connection callback
    }
@@ -253,17 +255,17 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
      {
          assert(!!connection);
          /* we have stored identity as a user data before, now can load it */
-         std::size_t identity = reinterpret_cast(connection->get_user_data());
+         const void * identity = connection->get_user_data();
          /* maybe we want to reconnect */
-         if (11111 == identity) /* it is the first tcp connection close */
+         if (reinterpret_cast<const void *>(11111) == identity) /* it is the first tcp connection close */
          {
              m_tcp_connection_1.reset();
-             m_tcp_manager.create_connection("172.16.4.33", 9001, false, 11111); 
+             m_tcp_manager.create_connection("172.16.4.33", 9001, false, identity); 
          }
-         else if (22222 == identity) /* it is the second tcp connection close */
+         else if (reinterpret_cast<const void *>(22222) == identity) /* it is the second tcp connection close */
          {
              m_tcp_connection_2.reset();
-             m_tcp_manager.create_connection("172.16.4.33", 9002, false, 22222); 
+             m_tcp_manager.create_connection("172.16.4.33", 9002, false, identity); 
          }
          else
          {
@@ -282,12 +284,12 @@ the file *test/test_service.h* has show you how to use it, and a quick explanati
          if (connection == m_udp_connection_1) /* it is the first udp connection close */
          {
              m_udp_connection_1.reset();
-             m_udp_manager.create_connection("192.168.1.113", 9011, false, 33333); 
+             m_udp_manager.create_connection("192.168.1.113", 9011, false, reinterpret_cast<const void *>(33333)); 
          }
          else if (connection == m_udp_connection_2) /* it is the second udp connection close */
          {
              m_udp_connection_2.reset();
-             m_udp_manager.create_connection("192.168.1.113", 9012, false, 44444); 
+             m_udp_manager.create_connection("192.168.1.113", 9012, false, reinterpret_cast<const void *>(44444)); 
          }
          else
          {

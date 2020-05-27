@@ -31,7 +31,7 @@ public:
     typedef std::shared_ptr<boost::asio::ip::tcp::resolver>     resolver_ptr;
 
 public:
-    TcpConnection(io_context_type & io_context, TcpServiceBase * tcp_service, bool passive, std::size_t identity);
+    TcpConnection(io_context_type & io_context, TcpServiceBase * tcp_service, bool passive, const void * identity);
     virtual ~TcpConnection() override;
 
 public:
@@ -83,7 +83,7 @@ private:
     TcpServiceBase                                * m_tcp_service;
     bool                                            m_running;
     bool                                            m_passive;
-    std::size_t                                     m_identity;
+    const void                                    * m_identity;
     socket_type                                     m_socket;
     std::string                                     m_host_ip;
     unsigned short                                  m_host_port;

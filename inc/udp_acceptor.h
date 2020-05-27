@@ -36,7 +36,7 @@ public:
     typedef std::map<endpoint_type, udp_connection_ptr>         udp_connection_map;
 
 public:
-    UdpAcceptor(io_context_type & io_context, UdpServiceBase * udp_service, unsigned short port);
+    UdpAcceptor(io_context_type & io_context, UdpServiceBase * udp_service, const char * host, unsigned short port);
     ~UdpAcceptor();
 
 public:

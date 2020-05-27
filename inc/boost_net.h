@@ -76,7 +76,7 @@ public:
     virtual ~TcpServiceBase();
 
 public:
-    virtual bool on_connect(TcpConnectionSharedPtr connection, std::size_t identity) = 0;
+    virtual bool on_connect(TcpConnectionSharedPtr connection, const void * identity) = 0;
     virtual bool on_accept(TcpConnectionSharedPtr connection, unsigned short listener_port) = 0;
     virtual bool on_recv(TcpConnectionSharedPtr connection) = 0;
     virtual bool on_send(TcpConnectionSharedPtr connection) = 0;
@@ -98,12 +98,12 @@ public:
     TcpManager & operator = (TcpManager &&) = delete;
 
 public:
-    bool init(TcpServiceBase * tcp_service, std::size_t thread_count = 5, unsigned short * port_array = nullptr, std::size_t port_count = 0);
+    bool init(TcpServiceBase * tcp_service, std::size_t thread_count = 5, const char * host = nullptr, unsigned short * port_array = nullptr, std::size_t port_count = 0);
     void exit();
 
 public:
-    bool create_connection(const std::string & host, const std::string & service, bool sync_connect = true, std::size_t identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
-    bool create_connection(const std::string & host, unsigned short port, bool sync_connect = true, std::size_t identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
+    bool create_connection(const std::string & host, const std::string & service, bool sync_connect = true, const void * identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
+    bool create_connection(const std::string & host, unsigned short port, bool sync_connect = true, const void * identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
 
 private:
     TcpManagerImpl                                * m_manager_impl;
@@ -147,7 +147,7 @@ public:
     virtual ~UdpServiceBase();
 
 public:
-    virtual bool on_connect(UdpConnectionSharedPtr connection, std::size_t identity) = 0;
+    virtual bool on_connect(UdpConnectionSharedPtr connection, const void * identity) = 0;
     virtual bool on_accept(UdpConnectionSharedPtr connection, unsigned short listener_port) = 0;
     virtual bool on_recv(UdpConnectionSharedPtr connection) = 0;
     virtual bool on_send(UdpConnectionSharedPtr connection) = 0;
@@ -167,12 +167,12 @@ public:
     UdpManager & operator = (const UdpManager &) = delete;
 
 public:
-    bool init(UdpServiceBase * udp_service, std::size_t thread_count = 5, unsigned short * port_array = nullptr, std::size_t port_count = 0);
+    bool init(UdpServiceBase * udp_service, std::size_t thread_count = 5, const char * host = nullptr, unsigned short * port_array = nullptr, std::size_t port_count = 0);
     void exit();
 
 public:
-    bool create_connection(const std::string & host, const std::string & service, bool sync_connect = true, std::size_t identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
-    bool create_connection(const std::string & host, unsigned short port, bool sync_connect = true, std::size_t identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
+    bool create_connection(const std::string & host, const std::string & service, bool sync_connect = true, const void * identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
+    bool create_connection(const std::string & host, unsigned short port, bool sync_connect = true, const void * identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
 
 private:
     UdpManagerImpl                                * m_manager_impl;

@@ -31,7 +31,7 @@ public:
     typedef std::shared_ptr<boost::asio::ip::udp::resolver>     resolver_ptr;
 
 public:
-    UdpActiveConnection(io_context_type & io_context, UdpServiceBase * udp_service, std::size_t identity);
+    UdpActiveConnection(io_context_type & io_context, UdpServiceBase * udp_service, const void * identity);
     virtual ~UdpActiveConnection() override;
 
 public:
@@ -83,7 +83,7 @@ private:
     io_context_type                               & m_io_context;
     UdpServiceBase                                * m_udp_service;
     bool                                            m_running;
-    std::size_t                                     m_identity;
+    const void                                    * m_identity;
     socket_type                                     m_socket;
     std::string                                     m_host_ip;
     unsigned short                                  m_host_port;

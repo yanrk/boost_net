@@ -16,14 +16,14 @@
 
 namespace BoostNet { // namespace BoostNet begin
 
-UdpAcceptor::UdpAcceptor(io_context_type & io_context, UdpServiceBase * udp_service, unsigned short port)
+UdpAcceptor::UdpAcceptor(io_context_type & io_context, UdpServiceBase * udp_service, const char * host, unsigned short port)
     : m_io_context(io_context)
     , m_udp_service(udp_service)
     , m_running(false)
-    , m_host_endpoint(boost::asio::ip::udp::v4(), port)
+    , m_host_endpoint(boost::asio::ip::address_v4::from_string(nullptr == host ? "0.0.0.0" : host), port)
     , m_peer_endpoint()
     , m_socket(io_context)
-    , m_host_ip("0.0.0.0")
+    , m_host_ip(nullptr == host ? "0.0.0.0" : host)
     , m_host_port(port)
     , m_connection_map()
     , m_send_buffer()

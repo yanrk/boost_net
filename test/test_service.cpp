@@ -27,7 +27,7 @@ TestService::~TestService()
 
 }
 
-bool TestService::on_connect(BoostNet::TcpConnectionSharedPtr connection, std::size_t identity)
+bool TestService::on_connect(BoostNet::TcpConnectionSharedPtr connection, const void * identity)
 {
     assert(m_use_tcp && m_requester);
 
@@ -238,7 +238,7 @@ bool TestService::check_message(BoostNet::TcpConnectionSharedPtr connection, con
     return (true);
 }
 
-bool TestService::on_connect(BoostNet::UdpConnectionSharedPtr connection, std::size_t identity)
+bool TestService::on_connect(BoostNet::UdpConnectionSharedPtr connection, const void * identity)
 {
     assert(!m_use_tcp && m_requester);
 
@@ -433,8 +433,9 @@ bool TestService::init()
         }
         else
         {
+            const char * host = "0.0.0.0";
             unsigned short port[] = { 12345 };
-            if (!m_tcp_manager.init(this, 5, port, sizeof(port) / sizeof(port[0])))
+            if (!m_tcp_manager.init(this, 5, host, port, sizeof(port) / sizeof(port[0])))
             {
                 return (false);
             }
@@ -460,8 +461,9 @@ bool TestService::init()
         }
         else
         {
+            const char * host = "0.0.0.0";
             unsigned short port[] = { 12345 };
-            if (!m_udp_manager.init(this, 5, port, sizeof(port) / sizeof(port[0])))
+            if (!m_udp_manager.init(this, 5, host, port, sizeof(port) / sizeof(port[0])))
             {
                 return (false);
             }

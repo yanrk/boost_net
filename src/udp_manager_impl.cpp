@@ -27,7 +27,7 @@ UdpManagerImpl::~UdpManagerImpl()
 
 }
 
-bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count, unsigned short port_array[], std::size_t port_count)
+bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count, const char * host, unsigned short port_array[], std::size_t port_count)
 {
     if (nullptr == udp_service)
     {
@@ -61,7 +61,7 @@ bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count
         for (std::size_t index = 0; index < port_count; ++index)
         {
             unsigned short port = port_array[index];
-            udp_acceptor_ptr udp_acceptor = boost::factory<udp_acceptor_ptr>()(m_io_context_pool.get(), m_udp_service, port);
+            udp_acceptor_ptr udp_acceptor = boost::factory<udp_acceptor_ptr>()(m_io_context_pool.get(), m_udp_service, host, port);
             udp_acceptor->start();
         }
     }
@@ -88,7 +88,7 @@ void UdpManagerImpl::run(bool blocking)
     m_io_context_pool.run(blocking);
 }
 
-bool UdpManagerImpl::create_connection(const std::string & host, const std::string & service, bool sync_connect, std::size_t identity, const char * bind_ip, unsigned short bind_port)
+bool UdpManagerImpl::create_connection(const std::string & host, const std::string & service, bool sync_connect, const void * identity, const char * bind_ip, unsigned short bind_port)
 {
     if (sync_connect)
     {
@@ -100,12 +100,12 @@ bool UdpManagerImpl::create_connection(const std::string & host, const std::stri
     }
 }
 
-bool UdpManagerImpl::create_connection(const std::string & host, unsigned short port, bool sync_connect, std::size_t identity, const char * bind_ip, unsigned short bind_port)
+bool UdpManagerImpl::create_connection(const std::string & host, unsigned short port, bool sync_connect, const void * identity, const char * bind_ip, unsigned short bind_port)
 {
     return (create_connection(host, boost::lexical_cast<std::string>(port), sync_connect, identity, bind_ip, bind_port));
 }
 
-bool UdpManagerImpl::sync_create_connection(const std::string & host, const std::string & service, std::size_t identity, const char * bind_ip, unsigned short bind_port)
+bool UdpManagerImpl::sync_create_connection(const std::string & host, const std::string & service, const void * identity, const char * bind_ip, unsigned short bind_port)
 {
     boost::asio::ip::udp::endpoint endpoint;
     if (nullptr == bind_ip || '\0' == *bind_ip)
@@ -158,7 +158,7 @@ bool UdpManagerImpl::sync_create_connection(const std::string & host, const std:
     return (true);
 }
 
-bool UdpManagerImpl::async_create_connection(const std::string & host, const std::string & service, std::size_t identity, const char * bind_ip, unsigned short bind_port)
+bool UdpManagerImpl::async_create_connection(const std::string & host, const std::string & service, const void * identity, const char * bind_ip, unsigned short bind_port)
 {
     boost::asio::ip::udp::endpoint endpoint;
     if (nullptr == bind_ip || '\0' == *bind_ip)

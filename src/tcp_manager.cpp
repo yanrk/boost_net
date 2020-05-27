@@ -25,7 +25,7 @@ TcpManager::~TcpManager()
     exit();
 }
 
-bool TcpManager::init(TcpServiceBase * tcp_service, std::size_t thread_count, unsigned short * port_array, std::size_t port_count)
+bool TcpManager::init(TcpServiceBase * tcp_service, std::size_t thread_count, const char * host, unsigned short * port_array, std::size_t port_count)
 {
     if (nullptr == tcp_service)
     {
@@ -43,7 +43,7 @@ bool TcpManager::init(TcpServiceBase * tcp_service, std::size_t thread_count, un
         return (false);
     }
 
-    if (m_manager_impl->init(tcp_service, thread_count, port_array, port_count))
+    if (m_manager_impl->init(tcp_service, thread_count, host, port_array, port_count))
     {
         return (true);
     }
@@ -64,12 +64,12 @@ void TcpManager::exit()
     }
 }
 
-bool TcpManager::create_connection(const std::string & host, const std::string & service, bool sync_connect, std::size_t identity, const char * bind_ip, unsigned short bind_port)
+bool TcpManager::create_connection(const std::string & host, const std::string & service, bool sync_connect, const void * identity, const char * bind_ip, unsigned short bind_port)
 {
     return (nullptr != m_manager_impl && m_manager_impl->create_connection(host, service, sync_connect, identity, bind_ip, bind_port));
 }
 
-bool TcpManager::create_connection(const std::string & host, unsigned short port, bool sync_connect, std::size_t identity, const char * bind_ip, unsigned short bind_port)
+bool TcpManager::create_connection(const std::string & host, unsigned short port, bool sync_connect, const void * identity, const char * bind_ip, unsigned short bind_port)
 {
     return (nullptr != m_manager_impl && m_manager_impl->create_connection(host, port, sync_connect, identity, bind_ip, bind_port));
 }
