@@ -85,6 +85,15 @@ public:
 
 class TcpManagerImpl;
 
+struct BOOST_NET_API Certificate
+{
+    bool         pass_file_not_buffer;
+    const char * cert_file_or_buffer;
+    const char * key_file_or_buffer;
+    const char * dh_file_or_buffer;
+    const char * password;
+};
+
 class BOOST_NET_API TcpManager
 {
 public:
@@ -98,7 +107,7 @@ public:
     TcpManager & operator = (TcpManager &&) = delete;
 
 public:
-    bool init(TcpServiceBase * tcp_service, std::size_t thread_count = 5, const char * host = nullptr, unsigned short * port_array = nullptr, std::size_t port_count = 0);
+    bool init(TcpServiceBase * tcp_service, std::size_t thread_count = 5, const char * host = nullptr, unsigned short * port_array = nullptr, std::size_t port_count = 0, const Certificate * server_certificate = nullptr, const Certificate * client_certificate = nullptr);
     void exit();
 
 public:

@@ -204,12 +204,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;EXPORT_BOOST_NET_DLL;WIN32;_DEBUG;_WINDOWS;_USRDLL;BOOST_NET_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;../../gnu_libs/openssl/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../gnu_libs/boost/boost_1_72_0/lib/windows/$(configuration)/;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../gnu_libs/boost/boost_1_72_0/lib/windows/$(configuration)/;../../gnu_libs/openssl/lib/windows/$(configuration)/;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcrypto.lib;libssl.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='dll_debug|x64'">
@@ -220,12 +221,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;EXPORT_BOOST_NET_DLL;WIN32;_DEBUG;_WINDOWS;_USRDLL;BOOST_NET_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;../../gnu_libs/openssl/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../gnu_libs/boost/boost_1_72_0/lib/windows/$(configuration)_x64/;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../gnu_libs/boost/boost_1_72_0/lib/windows/$(configuration)_x64/;../../gnu_libs/openssl/lib/windows/$(configuration)_x64/;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcrypto.lib;libssl.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='lib_debug|Win32'">
@@ -236,7 +238,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;_DEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;../../gnu_libs/openssl/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -255,7 +257,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;_DEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;../../gnu_libs/openssl/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -276,14 +278,15 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;EXPORT_BOOST_NET_DLL;WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_NET_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;../../gnu_libs/openssl/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../../gnu_libs/boost/boost_1_72_0/lib/windows/$(configuration)/;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../gnu_libs/boost/boost_1_72_0/lib/windows/$(configuration)/;../../gnu_libs/openssl/lib/windows/$(configuration)/;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcrypto.lib;libssl.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='dll_release|x64'">
@@ -296,14 +299,15 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;EXPORT_BOOST_NET_DLL;WIN32;NDEBUG;_WINDOWS;_USRDLL;BOOST_NET_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;../../gnu_libs/openssl/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>../../gnu_libs/boost/boost_1_72_0/lib/windows/$(configuration)_x64/;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../gnu_libs/boost/boost_1_72_0/lib/windows/$(configuration)_x64/;../../gnu_libs/openssl/lib/windows/$(configuration)_x64/;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcrypto.lib;libssl.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='lib_release|Win32'">
@@ -316,7 +320,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;NDEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;../../gnu_libs/openssl/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -339,7 +343,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;WIN32;NDEBUG;_WINDOWS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../inc/;../../gnu_libs/boost/boost_1_72_0/inc/;../../gnu_libs/openssl/inc/;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

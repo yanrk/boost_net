@@ -25,7 +25,7 @@ TcpManager::~TcpManager()
     exit();
 }
 
-bool TcpManager::init(TcpServiceBase * tcp_service, std::size_t thread_count, const char * host, unsigned short * port_array, std::size_t port_count)
+bool TcpManager::init(TcpServiceBase * tcp_service, std::size_t thread_count, const char * host, unsigned short * port_array, std::size_t port_count, const Certificate * server_certificate, const Certificate * client_certificate)
 {
     if (nullptr == tcp_service)
     {
@@ -43,7 +43,7 @@ bool TcpManager::init(TcpServiceBase * tcp_service, std::size_t thread_count, co
         return (false);
     }
 
-    if (m_manager_impl->init(tcp_service, thread_count, host, port_array, port_count))
+    if (m_manager_impl->init(tcp_service, thread_count, host, port_array, port_count, server_certificate, client_certificate))
     {
         return (true);
     }
