@@ -122,6 +122,7 @@ bool TcpManagerImpl::sync_create_tcp_connection(const std::string & host, const 
                 return (false);
             }
             socket.set_option(boost::asio::ip::tcp::socket::reuse_address(true), error);
+            socket.set_option(boost::asio::ip::tcp::socket::keep_alive(true), error);
             if (error)
             {
                 return (false);
@@ -179,6 +180,8 @@ void TcpManagerImpl::handle_accept(acceptor_type & acceptor, unsigned short port
         return;
     }
 
+    boost::system::error_code ignore_error_code;
+    session->socket_lowest().set_option(boost::asio::ip::tcp::socket::keep_alive(true), ignore_error_code);
     session->io_context().post(boost::bind(&SessionType::start, session));
 }
 

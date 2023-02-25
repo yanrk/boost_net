@@ -191,6 +191,7 @@ void TcpConnection<Derived, SocketType>::handle_resolve(const boost::system::err
             {
                 derived().socket_lowest().open(host_endpoint.protocol());
                 derived().socket_lowest().set_option(boost::asio::ip::tcp::socket::reuse_address(true));
+                derived().socket_lowest().set_option(boost::asio::ip::tcp::socket::keep_alive(true));
                 derived().socket_lowest().bind(host_endpoint);
             }
             catch (boost::system::error_code &)
