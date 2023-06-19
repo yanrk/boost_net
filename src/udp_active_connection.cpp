@@ -72,6 +72,9 @@ void UdpActiveConnection::stop()
 {
     if (m_running)
     {
+        boost::system::error_code ignore_error_code;
+        m_socket.shutdown(socket_type::shutdown_both, ignore_error_code);
+        m_socket.close(ignore_error_code);
         if (nullptr != m_udp_service)
         {
             m_udp_service->on_close(shared_from_this());
@@ -130,9 +133,6 @@ void UdpActiveConnection::handle_connect(const boost::system::error_code & error
 
 void UdpActiveConnection::close()
 {
-    boost::system::error_code ignore_error_code;
-    m_socket.shutdown(socket_type::shutdown_both, ignore_error_code);
-    m_socket.close(ignore_error_code);
     m_io_context.post(boost::bind(&UdpActiveConnection::stop, shared_from_this()));
 }
 

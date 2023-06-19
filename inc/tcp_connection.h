@@ -169,6 +169,7 @@ void TcpConnection<Derived, SocketType>::stop()
 {
     if (m_running)
     {
+        derived().shutdown();
         if (nullptr != m_tcp_service)
         {
             m_tcp_service->on_close(derived().shared_from_this());
@@ -268,7 +269,6 @@ void TcpConnection<Derived, SocketType>::handle_handshake(const boost::system::e
 template <class Derived, class SocketType>
 void TcpConnection<Derived, SocketType>::close()
 {
-    derived().shutdown();
     m_io_context.post(boost::bind(&TcpConnection::stop, derived().shared_from_this()));
 }
 
