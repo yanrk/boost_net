@@ -25,7 +25,7 @@ UdpManager::~UdpManager()
     exit();
 }
 
-bool UdpManager::init(UdpServiceBase * udp_service, std::size_t thread_count, const char * host, unsigned short * port_array, std::size_t port_count)
+bool UdpManager::init(UdpServiceBase * udp_service, std::size_t thread_count, const char * host, unsigned short * port_array, std::size_t port_count, bool port_any_valid)
 {
     if (nullptr == udp_service)
     {
@@ -43,7 +43,7 @@ bool UdpManager::init(UdpServiceBase * udp_service, std::size_t thread_count, co
         return (false);
     }
 
-    if (m_manager_impl->init(udp_service, thread_count, host, port_array, port_count))
+    if (m_manager_impl->init(udp_service, thread_count, host, port_array, port_count, port_any_valid))
     {
         return (true);
     }

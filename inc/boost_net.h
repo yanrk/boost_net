@@ -81,6 +81,7 @@ public:
     virtual bool on_recv(TcpConnectionSharedPtr connection) = 0;
     virtual bool on_send(TcpConnectionSharedPtr connection) = 0;
     virtual void on_close(TcpConnectionSharedPtr connection) = 0;
+    virtual void on_error(TcpConnectionSharedPtr connection, const char * operater, const char * action, int error, const char * message) = 0;
 };
 
 class TcpManagerImpl;
@@ -107,7 +108,7 @@ public:
     TcpManager & operator = (TcpManager &&) = delete;
 
 public:
-    bool init(TcpServiceBase * tcp_service, std::size_t thread_count = 5, const char * host = nullptr, unsigned short * port_array = nullptr, std::size_t port_count = 0, const Certificate * server_certificate = nullptr, const Certificate * client_certificate = nullptr);
+    bool init(TcpServiceBase * tcp_service, std::size_t thread_count = 5, const char * host = nullptr, unsigned short * port_array = nullptr, std::size_t port_count = 0, bool port_any_valid = false, const Certificate * server_certificate = nullptr, const Certificate * client_certificate = nullptr);
     void exit();
 
 public:
@@ -161,6 +162,7 @@ public:
     virtual bool on_recv(UdpConnectionSharedPtr connection) = 0;
     virtual bool on_send(UdpConnectionSharedPtr connection) = 0;
     virtual void on_close(UdpConnectionSharedPtr connection) = 0;
+    virtual void on_error(UdpConnectionSharedPtr connection, const char * operater, const char * action, int error, const char * message) = 0;
 };
 
 class UdpManagerImpl;
@@ -176,7 +178,7 @@ public:
     UdpManager & operator = (const UdpManager &) = delete;
 
 public:
-    bool init(UdpServiceBase * udp_service, std::size_t thread_count = 5, const char * host = nullptr, unsigned short * port_array = nullptr, std::size_t port_count = 0);
+    bool init(UdpServiceBase * udp_service, std::size_t thread_count = 5, const char * host = nullptr, unsigned short * port_array = nullptr, std::size_t port_count = 0, bool port_any_valid = false);
     void exit();
 
 public:

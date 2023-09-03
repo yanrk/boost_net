@@ -61,6 +61,7 @@ public:
     virtual bool on_recv(BoostNet::TcpConnectionSharedPtr connection);
     virtual bool on_send(BoostNet::TcpConnectionSharedPtr connection);
     virtual void on_close(BoostNet::TcpConnectionSharedPtr connection);
+    virtual void on_error(BoostNet::TcpConnectionSharedPtr connection, const char * operater, const char * action, int error, const char * message);
 
 private:
     bool running() const;
@@ -118,7 +119,7 @@ bool SslProxy::init(const proxy_config_t & proxy_config)
     client_certificate.dh_file_or_buffer = nullptr;
     client_certificate.password = nullptr;
 
-    if (!m_tcp_manager.init(this, 10, m_src_host.c_str(), &m_src_port, 1, nullptr, &client_certificate))
+    if (!m_tcp_manager.init(this, 10, m_src_host.c_str(), &m_src_port, 1, false, nullptr, &client_certificate))
     {
         RUN_LOG_ERR("ssl proxy init failure while tcp manager init on port %d", m_src_port);
         return (false);
@@ -312,6 +313,11 @@ void SslProxy::on_close(BoostNet::TcpConnectionSharedPtr connection)
         record_connection(connection_pair, "release");
         delete connection_pair;
     }
+}
+
+void SslProxy::on_error(BoostNet::TcpConnectionSharedPtr connection, const char * operater, const char * action, int error, const char * message)
+{
+
 }
 
 #ifndef _MSC_VER

@@ -132,7 +132,7 @@ bool TcpManagerImpl::set_client_certificate(const Certificate * certificate)
     return (true);
 }
 
-bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count, const char * host, unsigned short port_array[], std::size_t port_count, const Certificate * server_certificate, const Certificate * client_certificate)
+bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count, const char * host, unsigned short port_array[], std::size_t port_count, bool port_any_valid, const Certificate * server_certificate, const Certificate * client_certificate)
 {
     if (nullptr == tcp_service)
     {
@@ -164,24 +164,83 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
 
     m_tcp_service = tcp_service;
 
-    try
+    if (port_any_valid)
     {
-        for (std::size_t index = 0; index < port_count; ++index)
+        bool exception = false;
+        boost::system::error_code err;
+        std::size_t index = 0;
+        while (index < port_count)
         {
             unsigned short port = port_array[index];
-            endpoint_type endpoint(boost::asio::ip::address_v4::from_string(nullptr == host ? "0.0.0.0" : host), port);
-            bool reuse_address = true;
-            m_acceptors.push_back(boost::factory<acceptor_type *>()(m_io_context_pool.get(), endpoint, reuse_address));
-            start_accept(m_acceptors.back(), port);
+            if (0 == port)
+            {
+                m_tcp_service->on_error(TcpConnectionSharedPtr(), "listener", "init", 1, "port is invalid");
+            }
+            else
+            {
+                try
+                {
+                    endpoint_type endpoint(boost::asio::ip::address_v4::from_string(nullptr == host ? "0.0.0.0" : host), port);
+                    bool reuse_address = true;
+                    m_acceptors.push_back(boost::factory<acceptor_type *>()(m_io_context_pool.get(), endpoint, reuse_address));
+                    start_accept(m_acceptors.back(), port);
+                    break;
+                }
+                catch (boost::system::error_code & ec)
+                {
+                    err = ec;
+                }
+                catch (...)
+                {
+                    exception = true;
+                }
+            }
+            ++index;
+        }
+        if (index == port_count)
+        {
+            if (err)
+            {
+                m_tcp_service->on_error(TcpConnectionSharedPtr(), "listener", "init", err.value(), err.message().c_str());
+            }
+            else if (exception)
+            {
+                m_tcp_service->on_error(TcpConnectionSharedPtr(), "listener", "init", 1, "start exception");
+            }
+            return (false);
         }
     }
-    catch (boost::system::error_code &)
+    else
     {
-        return (false);
-    }
-    catch (...)
-    {
-        return (false);
+        try
+        {
+            for (std::size_t index = 0; index < port_count; ++index)
+            {
+                unsigned short port = port_array[index];
+                if (0 == port)
+                {
+                    m_tcp_service->on_error(TcpConnectionSharedPtr(), "listener", "init", 1, "port is invalid");
+                    return (false);
+                }
+                else
+                {
+                    endpoint_type endpoint(boost::asio::ip::address_v4::from_string(nullptr == host ? "0.0.0.0" : host), port);
+                    bool reuse_address = true;
+                    m_acceptors.push_back(boost::factory<acceptor_type *>()(m_io_context_pool.get(), endpoint, reuse_address));
+                    start_accept(m_acceptors.back(), port);
+                }
+            }
+        }
+        catch (boost::system::error_code & ec)
+        {
+            m_tcp_service->on_error(TcpConnectionSharedPtr(), "listener", "init", ec.value(), ec.message().c_str());
+            return (false);
+        }
+        catch (...)
+        {
+            m_tcp_service->on_error(TcpConnectionSharedPtr(), "listener", "init", 1, "start exception");
+            return (false);
+        }
     }
 
     return (true);

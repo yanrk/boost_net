@@ -50,7 +50,7 @@ public:
     TcpManagerImpl & operator = (TcpManagerImpl &&) = delete;
 
 public:
-    bool init(TcpServiceBase * tcp_service, std::size_t thread_count, const char * host, unsigned short port_array[], std::size_t port_count, const Certificate * server_certificate, const Certificate * client_certificate);
+    bool init(TcpServiceBase * tcp_service, std::size_t thread_count, const char * host, unsigned short port_array[], std::size_t port_count, bool port_any_valid, const Certificate * server_certificate, const Certificate * client_certificate);
     void exit();
 
 public:

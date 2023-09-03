@@ -71,6 +71,11 @@ void TestService::on_close(BoostNet::TcpConnectionSharedPtr connection)
     remove_connection(connection);
 }
 
+void TestService::on_error(BoostNet::TcpConnectionSharedPtr connection, const char * operater, const char * action, int error, const char * message)
+{
+
+}
+
 bool TestService::insert_connection(BoostNet::TcpConnectionSharedPtr connection)
 {
     if (!connection)
@@ -281,6 +286,11 @@ bool TestService::on_send(BoostNet::UdpConnectionSharedPtr connection)
 void TestService::on_close(BoostNet::UdpConnectionSharedPtr connection)
 {
     remove_connection(connection);
+}
+
+void TestService::on_error(BoostNet::UdpConnectionSharedPtr connection, const char * operater, const char * action, int error, const char * message)
+{
+
 }
 
 bool TestService::insert_connection(BoostNet::UdpConnectionSharedPtr connection)

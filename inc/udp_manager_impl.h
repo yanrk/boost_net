@@ -44,7 +44,7 @@ public:
     UdpManagerImpl & operator = (UdpManagerImpl &&) = delete;
 
 public:
-    bool init(UdpServiceBase * udp_service, std::size_t thread_count, const char * host, unsigned short port_array[], std::size_t port_count);
+    bool init(UdpServiceBase * udp_service, std::size_t thread_count, const char * host, unsigned short port_array[], std::size_t port_count, bool port_any_valid);
     void exit();
 
 public:

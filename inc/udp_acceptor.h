@@ -47,7 +47,7 @@ public:
 
 public:
     void get_host_address(std::string & ip, unsigned short & port);
-    void start();
+    bool start();
     void stop();
     void send(const endpoint_type & endpoint, const void * data, std::size_t len);
     void close(const endpoint_type & endpoint);
@@ -80,6 +80,7 @@ private:
     udp_connection_map                              m_connection_map;
     udp_send_buffer_type                            m_send_buffer;
     char                                            m_recv_data[max_recv_payload];
+    bool                                            m_good;
 };
 
 } // namespace BoostNet end

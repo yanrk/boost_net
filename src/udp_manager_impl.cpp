@@ -27,7 +27,7 @@ UdpManagerImpl::~UdpManagerImpl()
 
 }
 
-bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count, const char * host, unsigned short port_array[], std::size_t port_count)
+bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count, const char * host, unsigned short port_array[], std::size_t port_count, bool port_any_valid)
 {
     if (nullptr == udp_service)
     {
@@ -56,22 +56,50 @@ bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count
 
     m_udp_service = udp_service;
 
-    try
+    if (port_any_valid)
+    {
+        std::size_t index = 0;
+        while (index < port_count)
+        {
+            unsigned short port = port_array[index];
+            if (0 == port)
+            {
+                m_udp_service->on_error(UdpConnectionSharedPtr(), "listener", "init", 1, "port is invalid");
+            }
+            else
+            {
+                udp_acceptor_ptr udp_acceptor = boost::factory<udp_acceptor_ptr>()(m_io_context_pool.get(), m_udp_service, host, port);
+                if (udp_acceptor->start())
+                {
+                    break;
+                }
+            }
+            ++index;
+        }
+        if (index == port_count)
+        {
+            return (false);
+        }
+    }
+    else
     {
         for (std::size_t index = 0; index < port_count; ++index)
         {
             unsigned short port = port_array[index];
-            udp_acceptor_ptr udp_acceptor = boost::factory<udp_acceptor_ptr>()(m_io_context_pool.get(), m_udp_service, host, port);
-            udp_acceptor->start();
+            if (0 == port)
+            {
+                m_udp_service->on_error(UdpConnectionSharedPtr(), "listener", "init", 1, "port is invalid");
+                return (false);
+            }
+            else
+            {
+                udp_acceptor_ptr udp_acceptor = boost::factory<udp_acceptor_ptr>()(m_io_context_pool.get(), m_udp_service, host, port);
+                if (!udp_acceptor->start())
+                {
+                    return (false);
+                }
+            }
         }
-    }
-    catch (boost::system::error_code &)
-    {
-        return (false);
-    }
-    catch (...)
-    {
-        return (false);
     }
 
     return (true);

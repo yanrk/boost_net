@@ -28,11 +28,34 @@ UdpAcceptor::UdpAcceptor(io_context_type & io_context, UdpServiceBase * udp_serv
     , m_connection_map()
     , m_send_buffer()
     , m_recv_data()
+    , m_good(false)
 {
-    m_socket.open(m_host_endpoint.protocol());
-    m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-    m_socket.bind(m_host_endpoint);
+    boost::system::error_code ec;
+
+    m_socket.open(m_host_endpoint.protocol(), ec);
+    if (ec)
+    {
+        m_udp_service->on_error(UdpConnectionSharedPtr(), "listener", "open", ec.value(), ec.message().c_str());
+        return;
+    }
+
+    m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true), ec);
+    if (ec)
+    {
+        m_udp_service->on_error(UdpConnectionSharedPtr(), "listener", "reuse", ec.value(), ec.message().c_str());
+        return;
+    }
+
+    m_socket.bind(m_host_endpoint, ec);
+    if (ec)
+    {
+        m_udp_service->on_error(UdpConnectionSharedPtr(), "listener", "bind", ec.value(), ec.message().c_str());
+        return;
+    }
+
     memset(m_recv_data, 0x0, sizeof(m_recv_data));
+
+    m_good = true;
 }
 
 UdpAcceptor::~UdpAcceptor()
@@ -40,15 +63,20 @@ UdpAcceptor::~UdpAcceptor()
 
 }
 
-void UdpAcceptor::start()
+bool UdpAcceptor::start()
 {
-    boost::system::error_code ignore_error_code;
-    m_host_ip = m_host_endpoint.address().to_string(ignore_error_code);
-    m_host_port = m_host_endpoint.port();
+    if (m_good)
+    {
+        boost::system::error_code ignore_error_code;
+        m_host_ip = m_host_endpoint.address().to_string(ignore_error_code);
+        m_host_port = m_host_endpoint.port();
 
-    m_running = true;
+        m_running = true;
 
-    recv();
+        recv();
+    }
+
+    return (m_good);
 }
 
 void UdpAcceptor::stop()
