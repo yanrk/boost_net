@@ -18,6 +18,7 @@ namespace BoostNet { // namespace BoostNet begin
 UdpManagerImpl::UdpManagerImpl()
     : m_io_context_pool()
     , m_udp_service(nullptr)
+    , m_udp_ports()
 {
 
 }
@@ -56,6 +57,13 @@ bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count
 
     m_udp_service = udp_service;
 
+    m_udp_ports.clear();
+
+    if (0 == port_count)
+    {
+        return (true);
+    }
+
     if (port_any_valid)
     {
         std::size_t index = 0;
@@ -71,6 +79,7 @@ bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count
                 udp_acceptor_ptr udp_acceptor = boost::factory<udp_acceptor_ptr>()(m_io_context_pool.get(), m_udp_service, host, port);
                 if (udp_acceptor->start())
                 {
+                    m_udp_ports.push_back(port);
                     break;
                 }
             }
@@ -100,6 +109,7 @@ bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count
                 }
             }
         }
+        m_udp_ports.assign(port_array, port_array + port_count);
     }
 
     return (true);
@@ -109,6 +119,11 @@ void UdpManagerImpl::exit()
 {
     m_io_context_pool.exit();
     m_udp_service = nullptr;
+}
+
+void UdpManagerImpl::get_ports(std::vector<uint16_t> & ports)
+{
+    ports = m_udp_ports;
 }
 
 void UdpManagerImpl::run(bool blocking)

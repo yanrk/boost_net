@@ -25,6 +25,7 @@ TcpManagerImpl::TcpManagerImpl()
     , m_server_ssl_enable(false)
     , m_client_ssl_enable(false)
     , m_tcp_service(nullptr)
+    , m_tcp_ports()
 {
 
 }
@@ -164,6 +165,13 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
 
     m_tcp_service = tcp_service;
 
+    m_tcp_ports.clear();
+
+    if (0 == port_count)
+    {
+        return (true);
+    }
+
     if (port_any_valid)
     {
         bool exception = false;
@@ -184,6 +192,7 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
                     bool reuse_address = true;
                     m_acceptors.push_back(boost::factory<acceptor_type *>()(m_io_context_pool.get(), endpoint, reuse_address));
                     start_accept(m_acceptors.back(), port);
+                    m_tcp_ports.push_back(port);
                     break;
                 }
                 catch (boost::system::error_code & ec)
@@ -230,6 +239,7 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
                     start_accept(m_acceptors.back(), port);
                 }
             }
+            m_tcp_ports.assign(port_array, port_array + port_count);
         }
         catch (boost::system::error_code & ec)
         {
@@ -251,6 +261,11 @@ void TcpManagerImpl::exit()
     m_io_context_pool.exit();
     m_acceptors.clear();
     m_tcp_service = nullptr;
+}
+
+void TcpManagerImpl::get_ports(std::vector<uint16_t> & ports)
+{
+    ports = m_tcp_ports;
 }
 
 void TcpManagerImpl::run(bool blocking)

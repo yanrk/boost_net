@@ -13,6 +13,7 @@
 
 
 #include <string>
+#include <vector>
 #include <memory>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -54,6 +55,9 @@ public:
     void exit();
 
 public:
+    void get_ports(std::vector<uint16_t> & ports);
+
+public:
     void run(bool blocking = false);
 
 public:
@@ -88,6 +92,7 @@ private:
     bool                                            m_server_ssl_enable;
     bool                                            m_client_ssl_enable;
     TcpServiceBase                                * m_tcp_service;
+    std::vector<uint16_t>                           m_tcp_ports;
 };
 
 template<class SessionType, class SessionPtr>

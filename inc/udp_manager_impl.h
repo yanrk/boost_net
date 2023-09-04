@@ -13,6 +13,7 @@
 
 
 #include <string>
+#include <vector>
 #include <memory>
 #include <boost/asio.hpp>
 #include "boost_net.h"
@@ -48,6 +49,9 @@ public:
     void exit();
 
 public:
+    void get_ports(std::vector<uint16_t> & ports);
+
+public:
     void run(bool blocking = false);
 
 public:
@@ -61,6 +65,7 @@ private:
 private:
     io_context_pool_type                            m_io_context_pool;
     UdpServiceBase                                * m_udp_service;
+    std::vector<uint16_t>                           m_udp_ports;
 };
 
 } // namespace BoostNet end

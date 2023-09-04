@@ -64,6 +64,14 @@ void TcpManager::exit()
     }
 }
 
+void TcpManager::get_ports(std::vector<uint16_t> & ports)
+{
+    if (nullptr != m_manager_impl)
+    {
+        m_manager_impl->get_ports(ports);
+    }
+}
+
 bool TcpManager::create_connection(const std::string & host, const std::string & service, bool sync_connect, const void * identity, const char * bind_ip, unsigned short bind_port)
 {
     return (nullptr != m_manager_impl && m_manager_impl->create_connection(host, service, sync_connect, identity, bind_ip, bind_port));

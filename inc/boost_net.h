@@ -14,6 +14,7 @@
 
 #include <cstddef>
 #include <string>
+#include <vector>
 #include <memory>
 
 #ifdef _MSC_VER
@@ -112,6 +113,9 @@ public:
     void exit();
 
 public:
+    void get_ports(std::vector<uint16_t> & ports);
+
+public:
     bool create_connection(const std::string & host, const std::string & service, bool sync_connect = true, const void * identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
     bool create_connection(const std::string & host, unsigned short port, bool sync_connect = true, const void * identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
 
@@ -180,6 +184,9 @@ public:
 public:
     bool init(UdpServiceBase * udp_service, std::size_t thread_count = 5, const char * host = nullptr, unsigned short * port_array = nullptr, std::size_t port_count = 0, bool port_any_valid = false);
     void exit();
+
+public:
+    void get_ports(std::vector<uint16_t> & ports);
 
 public:
     bool create_connection(const std::string & host, const std::string & service, bool sync_connect = true, const void * identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
