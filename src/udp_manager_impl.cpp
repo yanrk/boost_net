@@ -119,6 +119,7 @@ void UdpManagerImpl::exit()
 {
     m_io_context_pool.exit();
     m_udp_service = nullptr;
+    m_udp_ports.clear();
 }
 
 void UdpManagerImpl::get_ports(std::vector<uint16_t> & ports)

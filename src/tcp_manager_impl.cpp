@@ -261,6 +261,7 @@ void TcpManagerImpl::exit()
     m_io_context_pool.exit();
     m_acceptors.clear();
     m_tcp_service = nullptr;
+    m_tcp_ports.clear();
 }
 
 void TcpManagerImpl::get_ports(std::vector<uint16_t> & ports)
