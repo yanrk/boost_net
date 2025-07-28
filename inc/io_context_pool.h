@@ -22,13 +22,11 @@ namespace BoostNet { // namespace BoostNet begin
 class IOServicePool : private boost::noncopyable
 {
 public:
-    typedef boost::asio::io_context                 io_context_type;
-    typedef boost::ptr_vector<io_context_type>      io_contexts_type;
-    typedef boost::asio::io_context::work           work_type;
-    typedef boost::ptr_vector<work_type>            works_type;
-    typedef boost::system::error_code               error_code_type;
-    typedef boost::ptr_vector<error_code_type>      error_codes_type;
-    typedef boost::thread_group                     thread_group_type;
+    typedef boost::asio::io_context                                                     io_context_type;
+    typedef boost::ptr_vector<io_context_type>                                          io_contexts_type;
+    typedef boost::asio::executor_work_guard<boost::asio::io_context::executor_type>    work_type;
+    typedef boost::ptr_vector<work_type>                                                works_type;
+    typedef boost::thread_group                                                         thread_group_type;
 
 public:
     explicit IOServicePool();
@@ -45,7 +43,6 @@ public:
 private:
     io_contexts_type                                m_io_contexts;
     works_type                                      m_works;
-    error_codes_type                                m_error_codes;
     thread_group_type                               m_thread_group;
     std::size_t                                     m_next_io_context;
 };

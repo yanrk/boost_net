@@ -9,6 +9,7 @@
  ********************************************************/
 
 #include <cstring>
+#include <boost/core/ignore_unused.hpp>
 #include <boost/functional/factory.hpp>
 #include <boost/lexical_cast.hpp>
 #include "tcp_manager_impl.h"
@@ -37,24 +38,24 @@ TcpManagerImpl::~TcpManagerImpl()
 
 const std::string & TcpManagerImpl::get_server_ssl_password() const
 {
-    return (m_server_ssl_password);
+    return m_server_ssl_password;
 }
 
 const std::string & TcpManagerImpl::get_client_ssl_password() const
 {
-    return (m_client_ssl_password);
+    return m_client_ssl_password;
 }
 
 bool TcpManagerImpl::set_server_certificate(const Certificate * certificate)
 {
     if (nullptr == certificate)
     {
-        return (true);
+        return true;
     }
 
     if (nullptr == certificate->cert_file_or_buffer || nullptr == certificate->key_file_or_buffer)
     {
-        return (false);
+        return false;
     }
 
     m_server_ssl_enable = true;
@@ -64,7 +65,13 @@ bool TcpManagerImpl::set_server_certificate(const Certificate * certificate)
     if (nullptr != certificate->password)
     {
         m_server_ssl_password = certificate->password;
-        m_server_ssl_context.set_password_callback(boost::bind(&TcpManagerImpl::get_server_ssl_password, this));
+        m_server_ssl_context.set_password_callback(
+            [this](std::size_t max_length, boost::asio::ssl::context::password_purpose purpose) {
+                boost::ignore_unused(max_length);
+                boost::ignore_unused(purpose);
+                return this->get_server_ssl_password(); 
+            }
+        );
     }
 
     if (certificate->pass_file_not_buffer)
@@ -88,19 +95,19 @@ bool TcpManagerImpl::set_server_certificate(const Certificate * certificate)
         }
     }
 
-    return (true);
+    return true;
 }
 
 bool TcpManagerImpl::set_client_certificate(const Certificate * certificate)
 {
     if (nullptr == certificate)
     {
-        return (true);
+        return true;
     }
 
     if (nullptr == certificate->cert_file_or_buffer)
     {
-        return (false);
+        return false;
     }
 
     m_client_ssl_enable = true;
@@ -108,7 +115,13 @@ bool TcpManagerImpl::set_client_certificate(const Certificate * certificate)
     if (nullptr != certificate->password)
     {
         m_client_ssl_password = certificate->password;
-        m_client_ssl_context.set_password_callback(boost::bind(&TcpManagerImpl::get_client_ssl_password, this));
+        m_client_ssl_context.set_password_callback(
+            [this](std::size_t max_length, boost::asio::ssl::context::password_purpose purpose) {
+                boost::ignore_unused(max_length);
+                boost::ignore_unused(purpose);
+                return this->get_client_ssl_password();
+            }
+        );
     }
 
     if (certificate->pass_file_not_buffer)
@@ -130,24 +143,24 @@ bool TcpManagerImpl::set_client_certificate(const Certificate * certificate)
         }
     }
 
-    return (true);
+    return true;
 }
 
 bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count, const char * host, unsigned short port_array[], std::size_t port_count, bool port_any_valid, const Certificate * server_certificate, const Certificate * client_certificate)
 {
     if (nullptr == tcp_service)
     {
-        return (false);
+        return false;
     }
 
     if (0 == thread_count)
     {
-        return (false);
+        return false;
     }
 
     if (nullptr == port_array && 0 != port_count)
     {
-        return (false);
+        return false;
     }
 
     set_server_certificate(server_certificate);
@@ -155,12 +168,12 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
 
     if (m_io_context_pool.size() > 0)
     {
-        return (false);
+        return false;
     }
 
     if (!m_io_context_pool.init(thread_count))
     {
-        return (false);
+        return false;
     }
 
     m_tcp_service = tcp_service;
@@ -169,7 +182,7 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
 
     if (0 == port_count)
     {
-        return (true);
+        return true;
     }
 
     if (port_any_valid)
@@ -188,7 +201,7 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
             {
                 try
                 {
-                    endpoint_type endpoint(boost::asio::ip::address_v4::from_string(nullptr == host ? "0.0.0.0" : host), port);
+                    endpoint_type endpoint(boost::asio::ip::make_address(nullptr == host ? "0.0.0.0" : host), port);
                     bool reuse_address = true;
                     m_acceptors.push_back(boost::factory<acceptor_type *>()(m_io_context_pool.get(), endpoint, reuse_address));
                     start_accept(m_acceptors.back(), port);
@@ -216,7 +229,7 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
             {
                 m_tcp_service->on_error(TcpConnectionSharedPtr(), "listener", "init", 1, "start exception");
             }
-            return (false);
+            return false;
         }
     }
     else
@@ -229,11 +242,11 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
                 if (0 == port)
                 {
                     m_tcp_service->on_error(TcpConnectionSharedPtr(), "listener", "init", 1, "port is invalid");
-                    return (false);
+                    return false;
                 }
                 else
                 {
-                    endpoint_type endpoint(boost::asio::ip::address_v4::from_string(nullptr == host ? "0.0.0.0" : host), port);
+                    endpoint_type endpoint(boost::asio::ip::make_address(nullptr == host ? "0.0.0.0" : host), port);
                     bool reuse_address = true;
                     m_acceptors.push_back(boost::factory<acceptor_type *>()(m_io_context_pool.get(), endpoint, reuse_address));
                     start_accept(m_acceptors.back(), port);
@@ -244,16 +257,16 @@ bool TcpManagerImpl::init(TcpServiceBase * tcp_service, std::size_t thread_count
         catch (boost::system::error_code & ec)
         {
             m_tcp_service->on_error(TcpConnectionSharedPtr(), "listener", "init", ec.value(), ec.message().c_str());
-            return (false);
+            return false;
         }
         catch (...)
         {
             m_tcp_service->on_error(TcpConnectionSharedPtr(), "listener", "init", 1, "start exception");
-            return (false);
+            return false;
         }
     }
 
-    return (true);
+    return true;
 }
 
 void TcpManagerImpl::exit()
@@ -264,7 +277,7 @@ void TcpManagerImpl::exit()
     m_tcp_ports.clear();
 }
 
-void TcpManagerImpl::get_ports(std::vector<uint16_t> & ports)
+void TcpManagerImpl::get_ports(std::vector<unsigned short> & ports)
 {
     ports = m_tcp_ports;
 }
@@ -281,12 +294,24 @@ void TcpManagerImpl::start_accept(acceptor_type & acceptor, unsigned short port)
     if (m_server_ssl_enable)
     {
         ssl_session_ptr ssl_session = boost::factory<ssl_session_ptr>()(m_io_context_pool.get(), m_server_ssl_context, m_tcp_service, passive, identity);
-        acceptor.async_accept(ssl_session->socket_lowest(), boost::bind(&TcpManagerImpl::handle_accept<ssl_session_type, ssl_session_ptr>, this, boost::ref(acceptor), port, ssl_session, boost::asio::placeholders::error));
+
+        acceptor.async_accept(
+            ssl_session->socket_lowest(),
+            [this, &acceptor, port, ssl_session](const boost::system::error_code & error) {
+                this->handle_accept<ssl_session_type, ssl_session_ptr>(acceptor, port, ssl_session, error);
+            }
+        );
     }
     else
     {
         tcp_session_ptr tcp_session = boost::factory<tcp_session_ptr>()(m_io_context_pool.get(), m_server_ssl_context, m_tcp_service, passive, identity);
-        acceptor.async_accept(tcp_session->socket_lowest(), boost::bind(&TcpManagerImpl::handle_accept<tcp_session_type, tcp_session_ptr>, this, boost::ref(acceptor), port, tcp_session, boost::asio::placeholders::error));
+
+        acceptor.async_accept(
+            tcp_session->socket_lowest(),
+            [this, &acceptor, port, tcp_session](const boost::system::error_code & error) {
+                this->handle_accept<tcp_session_type, tcp_session_ptr>(acceptor, port, tcp_session, error);
+            }
+        );
     }
 }
 
@@ -296,29 +321,29 @@ bool TcpManagerImpl::create_connection(const std::string & host, const std::stri
     {
         if (sync_connect)
         {
-            return (sync_create_tcp_connection<ssl_session_type, ssl_session_ptr>(host, service, identity, bind_ip, bind_port));
+            return sync_create_connection<ssl_session_type, ssl_session_ptr>(host, service, identity, bind_ip, bind_port);
         }
         else
         {
-            return (async_create_tcp_connection<ssl_session_type, ssl_session_ptr>(host, service, identity, bind_ip, bind_port));
+            return async_create_connection<ssl_session_type, ssl_session_ptr>(host, service, identity, bind_ip, bind_port);
         }
     }
     else
     {
         if (sync_connect)
         {
-            return (sync_create_tcp_connection<tcp_session_type, tcp_session_ptr>(host, service, identity, bind_ip, bind_port));
+            return sync_create_connection<tcp_session_type, tcp_session_ptr>(host, service, identity, bind_ip, bind_port);
         }
         else
         {
-            return (async_create_tcp_connection<tcp_session_type, tcp_session_ptr>(host, service, identity, bind_ip, bind_port));
+            return async_create_connection<tcp_session_type, tcp_session_ptr>(host, service, identity, bind_ip, bind_port);
         }
     }
 }
 
 bool TcpManagerImpl::create_connection(const std::string & host, unsigned short port, bool sync_connect, const void * identity, const char * bind_ip, unsigned short bind_port)
 {
-    return (create_connection(host, boost::lexical_cast<std::string>(port), sync_connect, identity, bind_ip, bind_port));
+    return create_connection(host, boost::lexical_cast<std::string>(port), sync_connect, identity, bind_ip, bind_port);
 }
 
 } // namespace BoostNet end

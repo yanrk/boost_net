@@ -30,7 +30,7 @@ void TcpConnectionBase::set_user_data(void * user_data)
 
 void * TcpConnectionBase::get_user_data()
 {
-    return (m_user_data);
+    return m_user_data;
 }
 
 TcpSession::TcpSession(io_context_type & io_context, ssl_context_type & ssl_context, TcpServiceBase * tcp_service, bool passive, const void * identity)
@@ -42,12 +42,12 @@ TcpSession::TcpSession(io_context_type & io_context, ssl_context_type & ssl_cont
 
 TcpSession::socket_type & TcpSession::socket()
 {
-    return (m_socket);
+    return m_socket;
 }
 
 TcpSession::lowest_type & TcpSession::socket_lowest()
 {
-    return (m_socket);
+    return m_socket;
 }
 
 void TcpSession::handshake(bool passive)
@@ -74,17 +74,22 @@ SslSession::SslSession(io_context_type & io_context, ssl_context_type & ssl_cont
 
 SslSession::socket_type & SslSession::socket()
 {
-    return (m_socket);
+    return m_socket;
 }
 
 SslSession::lowest_type & SslSession::socket_lowest()
 {
-    return (m_socket.lowest_layer());
+    return m_socket.lowest_layer();
 }
 
 void SslSession::handshake(bool passive)
 {
-    m_socket.async_handshake(passive ? boost::asio::ssl::stream_base::server : boost::asio::ssl::stream_base::client, boost::bind(&TcpConnection::handle_handshake, shared_from_this(), boost::asio::placeholders::error));
+    m_socket.async_handshake(
+        passive ? boost::asio::ssl::stream_base::server : boost::asio::ssl::stream_base::client,
+        [self = shared_from_this()](const boost::system::error_code & error) {
+            self->handle_handshake(error);
+        }
+    );
 }
 
 void SslSession::shutdown()

@@ -8,7 +8,6 @@
  * Copyright(C): 2018 - 2020
  ********************************************************/
 
-#include <boost/bind.hpp>
 #include <boost/functional/factory.hpp>
 #include <boost/lexical_cast.hpp>
 #include "udp_manager_impl.h"
@@ -32,27 +31,27 @@ bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count
 {
     if (nullptr == udp_service)
     {
-        return (false);
+        return false;
     }
 
     if (0 == thread_count)
     {
-        return (false);
+        return false;
     }
 
     if (nullptr == port_array && 0 != port_count)
     {
-        return (false);
+        return false;
     }
 
     if (m_io_context_pool.size() > 0)
     {
-        return (false);
+        return false;
     }
 
     if (!m_io_context_pool.init(thread_count))
     {
-        return (false);
+        return false;
     }
 
     m_udp_service = udp_service;
@@ -61,7 +60,7 @@ bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count
 
     if (0 == port_count)
     {
-        return (true);
+        return true;
     }
 
     if (port_any_valid)
@@ -87,7 +86,7 @@ bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count
         }
         if (index == port_count)
         {
-            return (false);
+            return false;
         }
     }
     else
@@ -98,21 +97,21 @@ bool UdpManagerImpl::init(UdpServiceBase * udp_service, std::size_t thread_count
             if (0 == port)
             {
                 m_udp_service->on_error(UdpConnectionSharedPtr(), "listener", "init", 1, "port is invalid");
-                return (false);
+                return false;
             }
             else
             {
                 udp_acceptor_ptr udp_acceptor = boost::factory<udp_acceptor_ptr>()(m_io_context_pool.get(), m_udp_service, host, port);
                 if (!udp_acceptor->start())
                 {
-                    return (false);
+                    return false;
                 }
             }
         }
         m_udp_ports.assign(port_array, port_array + port_count);
     }
 
-    return (true);
+    return true;
 }
 
 void UdpManagerImpl::exit()
@@ -122,7 +121,7 @@ void UdpManagerImpl::exit()
     m_udp_ports.clear();
 }
 
-void UdpManagerImpl::get_ports(std::vector<uint16_t> & ports)
+void UdpManagerImpl::get_ports(std::vector<unsigned short> & ports)
 {
     ports = m_udp_ports;
 }
@@ -136,17 +135,17 @@ bool UdpManagerImpl::create_connection(const std::string & host, const std::stri
 {
     if (sync_connect)
     {
-        return (sync_create_connection(host, service, identity, bind_ip, bind_port));
+        return sync_create_connection(host, service, identity, bind_ip, bind_port);
     }
     else
     {
-        return (async_create_connection(host, service, identity, bind_ip, bind_port));
+        return async_create_connection(host, service, identity, bind_ip, bind_port);
     }
 }
 
 bool UdpManagerImpl::create_connection(const std::string & host, unsigned short port, bool sync_connect, const void * identity, const char * bind_ip, unsigned short bind_port)
 {
-    return (create_connection(host, boost::lexical_cast<std::string>(port), sync_connect, identity, bind_ip, bind_port));
+    return create_connection(host, boost::lexical_cast<std::string>(port), sync_connect, identity, bind_ip, bind_port);
 }
 
 bool UdpManagerImpl::sync_create_connection(const std::string & host, const std::string & service, const void * identity, const char * bind_ip, unsigned short bind_port)
@@ -158,17 +157,16 @@ bool UdpManagerImpl::sync_create_connection(const std::string & host, const std:
     }
     else
     {
-        endpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::from_string(bind_ip), bind_port);
+        endpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::make_address(bind_ip), bind_port);
     }
 
     udp_connection_ptr udp_connection = boost::factory<udp_connection_ptr>()(m_io_context_pool.get(), m_udp_service, identity);
     udp_connection_type::socket_type & socket = udp_connection->socket();
 
     boost::asio::ip::udp::resolver resolver(udp_connection->io_context());
-    boost::asio::ip::udp::resolver::query query(host, service);
-    boost::asio::ip::udp::resolver::iterator iter_end;
+    boost::asio::ip::udp::resolver::results_type results = resolver.resolve(host, service);
     boost::system::error_code error = boost::asio::error::host_not_found;
-    for (boost::asio::ip::udp::resolver::iterator iter = resolver.resolve(query); error && iter_end != iter; ++iter)
+    for (boost::asio::ip::udp::resolver::results_type::iterator iter = results.begin(); error && results.end() != iter; ++iter)
     {
         socket.close(error);
         if (0 != endpoint.port() || !endpoint.address().is_unspecified())
@@ -176,17 +174,17 @@ bool UdpManagerImpl::sync_create_connection(const std::string & host, const std:
             socket.open(endpoint.protocol(), error);
             if (error)
             {
-                return (false);
+                return false;
             }
             socket.set_option(boost::asio::ip::udp::socket::reuse_address(true), error);
             if (error)
             {
-                return (false);
+                return false;
             }
             socket.bind(endpoint, error);
             if (error)
             {
-                return (false);
+                return false;
             }
         }
         socket.connect(*iter, error);
@@ -194,12 +192,12 @@ bool UdpManagerImpl::sync_create_connection(const std::string & host, const std:
 
     if (error)
     {
-        return (false);
+        return false;
     }
 
-    udp_connection->io_context().post(boost::bind(&UdpActiveConnection::start, udp_connection));
+    boost::asio::post(udp_connection->io_context(), [udp_connection]() { udp_connection->start(); });
 
-    return (true);
+    return true;
 }
 
 bool UdpManagerImpl::async_create_connection(const std::string & host, const std::string & service, const void * identity, const char * bind_ip, unsigned short bind_port)
@@ -211,16 +209,22 @@ bool UdpManagerImpl::async_create_connection(const std::string & host, const std
     }
     else
     {
-        endpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::from_string(bind_ip), bind_port);
+        endpoint = boost::asio::ip::udp::endpoint(boost::asio::ip::make_address(bind_ip), bind_port);
     }
 
     udp_connection_ptr udp_connection = boost::factory<udp_connection_ptr>()(m_io_context_pool.get(), m_udp_service, identity);
 
-    boost::asio::ip::udp::resolver::query query(host, service);
     resolver_ptr resolver = boost::factory<resolver_ptr>()(udp_connection->io_context());
-    resolver->async_resolve(query, boost::bind(&UdpActiveConnection::handle_resolve, udp_connection, boost::asio::placeholders::error, boost::asio::placeholders::iterator, endpoint, resolver));
 
-    return (true);
+    resolver->async_resolve(
+        host,
+        service,
+        [udp_connection, endpoint, resolver](const boost::system::error_code & error, const boost::asio::ip::udp::resolver::results_type & results) {
+            udp_connection->handle_resolve(error, results, endpoint, resolver);
+        }
+    );
+
+    return true;
 }
 
 } // namespace BoostNet end

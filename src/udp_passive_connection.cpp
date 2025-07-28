@@ -8,7 +8,6 @@
  * Copyright(C): 2018 - 2020
  ********************************************************/
 
-#include <boost/bind.hpp>
 #include "udp_acceptor.h"
 #include "udp_passive_connection.h"
 
@@ -34,8 +33,7 @@ UdpPassiveConnection::~UdpPassiveConnection()
 
 void UdpPassiveConnection::start()
 {
-    boost::system::error_code ignore_error_code;
-    m_peer_ip = m_endpoint.address().to_string(ignore_error_code);
+    m_peer_ip = m_endpoint.address().to_string();
     m_peer_port = m_endpoint.port();
 
     m_running = true;
@@ -98,49 +96,49 @@ void UdpPassiveConnection::get_peer_address(std::string & ip, unsigned short & p
 
 bool UdpPassiveConnection::recv_buffer_has_data()
 {
-    return (!m_recv_buffer.empty());
+    return !m_recv_buffer.empty();
 }
 
 const void * UdpPassiveConnection::recv_buffer_data()
 {
     if (m_recv_buffer.empty())
     {
-        return (nullptr);
+        return nullptr;
     }
     if (m_recv_buffer.front().empty())
     {
-        return (nullptr);
+        return nullptr;
     }
-    return (reinterpret_cast<const void *>(&m_recv_buffer.front()[0]));
+    return reinterpret_cast<const void *>(&m_recv_buffer.front()[0]);
 }
 
 std::size_t UdpPassiveConnection::recv_buffer_size()
 {
     if (m_recv_buffer.empty())
     {
-        return (0);
+        return 0;
     }
-    return (m_recv_buffer.front().size());
+    return m_recv_buffer.front().size();
 }
 
 bool UdpPassiveConnection::recv_buffer_drop()
 {
     if (m_recv_buffer.empty())
     {
-        return (false);
+        return false;
     }
     m_recv_buffer.pop_front();
-    return (true);
+    return true;
 }
 
 bool UdpPassiveConnection::send_buffer_fill(const void * data, std::size_t len)
 {
     if (nullptr == data && 0 != len)
     {
-        return (false);
+        return false;
     }
     send(data, len);
-    return (true);
+    return true;
 }
 
 } // namespace BoostNet end

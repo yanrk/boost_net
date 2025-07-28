@@ -9,7 +9,7 @@
  ********************************************************/
 
 #include <cstring>
-#include <boost/bind.hpp>
+#include <boost/core/ignore_unused.hpp>
 #include <boost/functional/factory.hpp>
 #include "udp_passive_connection.h"
 #include "udp_acceptor.h"
@@ -20,7 +20,7 @@ UdpAcceptor::UdpAcceptor(io_context_type & io_context, UdpServiceBase * udp_serv
     : m_io_context(io_context)
     , m_udp_service(udp_service)
     , m_running(false)
-    , m_host_endpoint(boost::asio::ip::address_v4::from_string(nullptr == host ? "0.0.0.0" : host), port)
+    , m_host_endpoint(boost::asio::ip::make_address(nullptr == host ? "0.0.0.0" : host), port)
     , m_peer_endpoint()
     , m_socket(io_context)
     , m_host_ip(nullptr == host ? "0.0.0.0" : host)
@@ -67,8 +67,7 @@ bool UdpAcceptor::start()
 {
     if (m_good)
     {
-        boost::system::error_code ignore_error_code;
-        m_host_ip = m_host_endpoint.address().to_string(ignore_error_code);
+        m_host_ip = m_host_endpoint.address().to_string();
         m_host_port = m_host_endpoint.port();
 
         m_running = true;
@@ -76,7 +75,7 @@ bool UdpAcceptor::start()
         recv();
     }
 
-    return (m_good);
+    return m_good;
 }
 
 void UdpAcceptor::stop()
@@ -86,7 +85,7 @@ void UdpAcceptor::stop()
         boost::system::error_code ignore_error_code;
         m_socket.shutdown(socket_type::shutdown_both, ignore_error_code);
         m_socket.close(ignore_error_code);
-        m_io_context.post(boost::bind(&UdpAcceptor::handle_stop, shared_from_this()));
+        boost::asio::post(m_io_context, [self = shared_from_this()]() { self->handle_stop(); });
         m_running = false;
     }
 }
@@ -103,7 +102,12 @@ void UdpAcceptor::handle_stop()
 
 void UdpAcceptor::send(const endpoint_type & endpoint, const void * data, std::size_t len)
 {
-    m_io_context.post(boost::bind(&UdpAcceptor::push_send_data, shared_from_this(), std::make_pair(endpoint, std::vector<char>(reinterpret_cast<const char *>(data), reinterpret_cast<const char *>(data) + len))));
+    boost::asio::post(
+        m_io_context,
+        [self = shared_from_this(), endpoint, pack = std::vector<char>(reinterpret_cast<const char *>(data), reinterpret_cast<const char *>(data) + len)]() mutable {
+            self->push_send_data(std::make_pair(endpoint, std::move(pack)));
+        }
+    );
 }
 
 void UdpAcceptor::push_send_data(endpoint_buffer_type endpoint_data)
@@ -118,11 +122,19 @@ void UdpAcceptor::push_send_data(endpoint_buffer_type endpoint_data)
 
 void UdpAcceptor::send()
 {
-    m_socket.async_send_to(boost::asio::buffer(m_send_buffer.front().second), m_send_buffer.front().first, boost::bind(&UdpAcceptor::handle_send, shared_from_this(), boost::asio::placeholders::error));
+    m_socket.async_send_to(
+        boost::asio::buffer(m_send_buffer.front().second),
+        m_send_buffer.front().first,
+        [self = shared_from_this()](const boost::system::error_code & error, std::size_t bytes_transferred) {
+            self->handle_send(error, bytes_transferred);
+        }
+    );
 }
 
-void UdpAcceptor::handle_send(const boost::system::error_code & error)
+void UdpAcceptor::handle_send(const boost::system::error_code & error, std::size_t bytes_transferred)
 {
+    boost::ignore_unused(bytes_transferred);
+
     BOOST_ASSERT(!m_send_buffer.empty());
 
     m_send_buffer.pop_front();
@@ -135,7 +147,13 @@ void UdpAcceptor::handle_send(const boost::system::error_code & error)
 
 void UdpAcceptor::recv()
 {
-    m_socket.async_receive_from(boost::asio::buffer(m_recv_data, sizeof(m_recv_data)), m_peer_endpoint, boost::bind(&UdpAcceptor::handle_recv, shared_from_this(), boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    m_socket.async_receive_from(
+        boost::asio::buffer(m_recv_data, sizeof(m_recv_data)),
+        m_peer_endpoint,
+        [self = shared_from_this()](const boost::system::error_code & error, std::size_t bytes_transferred) {
+            self->handle_recv(error, bytes_transferred);
+        }
+    );
 }
 
 void UdpAcceptor::handle_recv(const boost::system::error_code & error, std::size_t bytes_transferred)
@@ -161,7 +179,7 @@ void UdpAcceptor::handle_recv(const boost::system::error_code & error, std::size
 
 void UdpAcceptor::close(const endpoint_type & endpoint)
 {
-    m_io_context.post(boost::bind(&UdpAcceptor::handle_close, shared_from_this(), endpoint));
+    boost::asio::post(m_io_context, [self = shared_from_this(), endpoint]() { self->handle_close(endpoint); });
 }
 
 void UdpAcceptor::handle_close(endpoint_type endpoint)

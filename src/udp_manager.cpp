@@ -29,29 +29,29 @@ bool UdpManager::init(UdpServiceBase * udp_service, std::size_t thread_count, co
 {
     if (nullptr == udp_service)
     {
-        return (false);
+        return false;
     }
 
     if (nullptr != m_manager_impl)
     {
-        return (false);
+        return false;
     }
 
     m_manager_impl = boost::factory<UdpManagerImpl *>()();
     if (nullptr == m_manager_impl)
     {
-        return (false);
+        return false;
     }
 
     if (m_manager_impl->init(udp_service, thread_count, host, port_array, port_count, port_any_valid))
     {
-        return (true);
+        return true;
     }
 
     boost::checked_delete(m_manager_impl);
     m_manager_impl = nullptr;
 
-    return (false);
+    return false;
 }
 
 void UdpManager::exit()
@@ -64,7 +64,7 @@ void UdpManager::exit()
     }
 }
 
-void UdpManager::get_ports(std::vector<uint16_t> & ports)
+void UdpManager::get_ports(std::vector<unsigned short> & ports)
 {
     if (nullptr != m_manager_impl)
     {
@@ -74,12 +74,12 @@ void UdpManager::get_ports(std::vector<uint16_t> & ports)
 
 bool UdpManager::create_connection(const std::string & host, const std::string & service, bool sync_connect, const void * identity, const char * bind_ip, unsigned short bind_port)
 {
-    return (nullptr != m_manager_impl && m_manager_impl->create_connection(host, service, sync_connect, identity, bind_ip, bind_port));
+    return nullptr != m_manager_impl && m_manager_impl->create_connection(host, service, sync_connect, identity, bind_ip, bind_port);
 }
 
 bool UdpManager::create_connection(const std::string & host, unsigned short port, bool sync_connect, const void * identity, const char * bind_ip, unsigned short bind_port)
 {
-    return (nullptr != m_manager_impl && m_manager_impl->create_connection(host, port, sync_connect, identity, bind_ip, bind_port));
+    return nullptr != m_manager_impl && m_manager_impl->create_connection(host, port, sync_connect, identity, bind_ip, bind_port);
 }
 
 } // namespace BoostNet end

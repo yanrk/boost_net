@@ -30,7 +30,7 @@ void UdpConnectionBase::set_user_data(void * user_data)
 
 void * UdpConnectionBase::get_user_data()
 {
-    return (m_user_data);
+    return m_user_data;
 }
 
 } // namespace BoostNet end

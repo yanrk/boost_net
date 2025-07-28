@@ -15,7 +15,7 @@ namespace BoostNet { // namespace BoostNet begin
 
 TcpRecvBuffer::mutable_buffers_type TcpRecvBuffer::prepare(size_type size)
 {
-    return (m_buffer.prepare(size));
+    return m_buffer.prepare(size);
 }
 
 void TcpRecvBuffer::commit(size_type size)
@@ -25,12 +25,12 @@ void TcpRecvBuffer::commit(size_type size)
 
 TcpRecvBuffer::size_type TcpRecvBuffer::size() const
 {
-    return (m_buffer.size());
+    return m_buffer.size();
 }
 
 const char * TcpRecvBuffer::c_str() const
 {
-    return (boost::asio::buffer_cast<const char *>(m_buffer.data()));
+    return reinterpret_cast<const char *>(m_buffer.data().data());
 }
 
 void TcpRecvBuffer::consume(size_type size)

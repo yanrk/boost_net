@@ -14,9 +14,9 @@
 
 #include <string>
 #include <vector>
-#include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+#include <boost/core/ignore_unused.hpp>
 #include "boost_net.h"
 #include "tcp_recv_buffer.h"
 #include "tcp_send_buffer.h"
@@ -66,8 +66,8 @@ public:
     void start();
 
 public:
-    void handle_resolve(const boost::system::error_code & error, boost::asio::ip::tcp::resolver::iterator iterator, boost::asio::ip::tcp::endpoint host_endpoint, resolver_ptr resolver);
-    void handle_connect(const boost::system::error_code & error, boost::asio::ip::tcp::resolver::iterator iterator, boost::asio::ip::tcp::endpoint host_endpoint, resolver_ptr resolver);
+    void handle_resolve(const boost::system::error_code & error, const boost::asio::ip::tcp::resolver::results_type & results, boost::asio::ip::tcp::endpoint host_endpoint, resolver_ptr resolver);
+    void handle_connect(const boost::system::error_code & error, const boost::asio::ip::tcp::endpoint & peer_endpoint, std::unique_ptr<size_t> times);
     void handle_handshake(const boost::system::error_code & error);
 
 private:
@@ -78,7 +78,7 @@ private:
     void push_send_data(std::vector<char> data);
 
 private:
-    void handle_send(const boost::system::error_code & error);
+    void handle_send(const boost::system::error_code & error, std::size_t bytes_transferred);
     void handle_recv(const boost::system::error_code & error, std::size_t bytes_transferred);
 
 private:
@@ -130,25 +130,25 @@ TcpConnection<Derived, SocketType>::~TcpConnection()
 template <class Derived, class SocketType>
 Derived & TcpConnection<Derived, SocketType>::derived()
 {
-    return (static_cast<Derived &>(*this));
+    return static_cast<Derived &>(*this);
 }
 
 template <class Derived, class SocketType>
 typename TcpConnection<Derived, SocketType>::io_context_type & TcpConnection<Derived, SocketType>::io_context()
 {
-    return (m_io_context);
+    return m_io_context;
 }
 
 template <class Derived, class SocketType>
 typename TcpConnection<Derived, SocketType>::tcp_recv_buffer_type & TcpConnection<Derived, SocketType>::recv_buffer()
 {
-    return (m_recv_buffer);
+    return m_recv_buffer;
 }
 
 template <class Derived, class SocketType>
 typename TcpConnection<Derived, SocketType>::tcp_send_buffer_type & TcpConnection<Derived, SocketType>::send_buffer()
 {
-    return (m_send_buffer);
+    return m_send_buffer;
 }
 
 template <class Derived, class SocketType>
@@ -179,53 +179,65 @@ void TcpConnection<Derived, SocketType>::stop()
 }
 
 template <class Derived, class SocketType>
-void TcpConnection<Derived, SocketType>::handle_resolve(const boost::system::error_code & error, boost::asio::ip::tcp::resolver::iterator iterator, boost::asio::ip::tcp::endpoint host_endpoint, resolver_ptr resolver)
+void TcpConnection<Derived, SocketType>::handle_resolve(const boost::system::error_code & error, const boost::asio::ip::tcp::resolver::results_type & results, boost::asio::ip::tcp::endpoint host_endpoint, resolver_ptr resolver)
 {
-    boost::asio::ip::tcp::resolver::iterator iter_end;
-    if (iter_end != iterator)
-    {
-        boost::system::error_code connect_error_code = boost::asio::error::host_not_found;
-        derived().socket_lowest().close(connect_error_code);
-        if (0 != host_endpoint.port() || !host_endpoint.address().is_unspecified())
-        {
-            try
-            {
-                derived().socket_lowest().open(host_endpoint.protocol());
-                derived().socket_lowest().set_option(boost::asio::ip::tcp::socket::reuse_address(true));
-                derived().socket_lowest().set_option(boost::asio::ip::tcp::socket::keep_alive(true));
-                derived().socket_lowest().bind(host_endpoint);
-            }
-            catch (boost::system::error_code &)
-            {
-                if (nullptr != m_tcp_service)
-                {
-                    m_tcp_service->on_connect(nullptr, m_identity);
-                }
-                return;
-            }
-        }
-        boost::asio::ip::tcp::endpoint peer_endpoint(*iterator++);
-        derived().socket_lowest().async_connect(peer_endpoint, boost::bind(&TcpConnection::handle_connect, derived().shared_from_this(), boost::asio::placeholders::error, iterator, host_endpoint, resolver));
-    }
-    else
+    if (error)
     {
         if (nullptr != m_tcp_service)
         {
             m_tcp_service->on_connect(nullptr, m_identity);
         }
+        return;
     }
+
+    boost::system::error_code connect_error_code = boost::asio::error::host_not_found;
+    derived().socket_lowest().close(connect_error_code);
+    if (0 != host_endpoint.port() || !host_endpoint.address().is_unspecified())
+    {
+        try
+        {
+            derived().socket_lowest().open(host_endpoint.protocol());
+            derived().socket_lowest().set_option(boost::asio::ip::tcp::socket::reuse_address(true));
+            derived().socket_lowest().set_option(boost::asio::ip::tcp::socket::keep_alive(true));
+            derived().socket_lowest().bind(host_endpoint);
+        }
+        catch (boost::system::error_code &)
+        {
+            if (nullptr != m_tcp_service)
+            {
+                m_tcp_service->on_connect(nullptr, m_identity);
+            }
+            return;
+        }
+    }
+
+    boost::asio::async_connect(
+        derived().socket_lowest(),
+        results,
+        [self = derived().shared_from_this(), times = results.size()](const boost::system::error_code & error, const boost::asio::ip::tcp::endpoint & endpoint) mutable {
+            self->handle_connect(error, endpoint, std::make_unique<size_t>(times));
+        }
+    );
 }
 
 template <class Derived, class SocketType>
-void TcpConnection<Derived, SocketType>::handle_connect(const boost::system::error_code & error, boost::asio::ip::tcp::resolver::iterator iterator, boost::asio::ip::tcp::endpoint host_endpoint, resolver_ptr resolver)
+void TcpConnection<Derived, SocketType>::handle_connect(const boost::system::error_code & error, const boost::asio::ip::tcp::endpoint & peer_endpoint, std::unique_ptr<size_t> times)
 {
-    if (error)
+    if (!error)
     {
-        handle_resolve(error, iterator, host_endpoint, resolver);
+        boost::asio::post(m_io_context, [self = derived().shared_from_this()]() { self->start(); });
+        return;
     }
-    else
+
+    if (!!times && *times > 1)
     {
-        io_context().post(boost::bind(&TcpConnection::start, derived().shared_from_this()));
+        --*times;
+        return;
+    }
+
+    if (nullptr != m_tcp_service)
+    {
+        m_tcp_service->on_connect(nullptr, m_identity);
     }
 }
 
@@ -233,9 +245,9 @@ template <class Derived, class SocketType>
 void TcpConnection<Derived, SocketType>::handle_handshake(const boost::system::error_code & error)
 {
     boost::system::error_code ignore_error_code;
-    m_host_ip = derived().socket_lowest().local_endpoint(ignore_error_code).address().to_string(ignore_error_code);
+    m_host_ip = derived().socket_lowest().local_endpoint(ignore_error_code).address().to_string();
     m_host_port = derived().socket_lowest().local_endpoint(ignore_error_code).port();
-    m_peer_ip = derived().socket_lowest().remote_endpoint(ignore_error_code).address().to_string(ignore_error_code);
+    m_peer_ip = derived().socket_lowest().remote_endpoint(ignore_error_code).address().to_string();
     m_peer_port = derived().socket_lowest().remote_endpoint(ignore_error_code).port();
 
     if (!error)
@@ -269,25 +281,41 @@ void TcpConnection<Derived, SocketType>::handle_handshake(const boost::system::e
 template <class Derived, class SocketType>
 void TcpConnection<Derived, SocketType>::close()
 {
-    m_io_context.post(boost::bind(&TcpConnection::stop, derived().shared_from_this()));
+    boost::asio::post(m_io_context, [self = derived().shared_from_this()]() { self->stop(); });
 }
 
 template <class Derived, class SocketType>
 void TcpConnection<Derived, SocketType>::recv()
 {
-    derived().socket().async_read_some(m_recv_buffer.prepare(), boost::bind(&TcpConnection::handle_recv, derived().shared_from_this(), boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+    derived().socket().async_read_some(
+        m_recv_buffer.prepare(),
+        [self = derived().shared_from_this()](const boost::system::error_code & error, std::size_t bytes_transferred) {
+            self->handle_recv(error, bytes_transferred);
+        }
+    );
 }
 
 template <class Derived, class SocketType>
 void TcpConnection<Derived, SocketType>::send()
 {
-    boost::asio::async_write(derived().socket(), boost::asio::buffer(m_send_buffer.data()), boost::bind(&TcpConnection::handle_send, derived().shared_from_this(), boost::asio::placeholders::error));
+    boost::asio::async_write(
+        derived().socket(),
+        boost::asio::buffer(m_send_buffer.data()),
+        [self = derived().shared_from_this()](const boost::system::error_code & error, std::size_t bytes_transferred) {
+            self->handle_send(error, bytes_transferred);
+        }
+    );
 }
 
 template <class Derived, class SocketType>
 void TcpConnection<Derived, SocketType>::post_send_data(const void * data, std::size_t len)
 {
-    io_context().post(boost::bind(&TcpConnection::push_send_data, derived().shared_from_this(), std::vector<char>(reinterpret_cast<const char *>(data), reinterpret_cast<const char *>(data) + len)));
+    boost::asio::post(
+        m_io_context,
+        [self = derived().shared_from_this(), pack = std::vector<char>(reinterpret_cast<const char *>(data), reinterpret_cast<const char *>(data) + len)]() mutable {
+            self->push_send_data(std::move(pack));
+        }
+    );
 }
 
 template <class Derived, class SocketType>
@@ -332,8 +360,10 @@ void TcpConnection<Derived, SocketType>::handle_recv(const boost::system::error_
 }
 
 template <class Derived, class SocketType>
-void TcpConnection<Derived, SocketType>::handle_send(const boost::system::error_code & error)
+void TcpConnection<Derived, SocketType>::handle_send(const boost::system::error_code & error, std::size_t bytes_transferred)
 {
+    boost::ignore_unused(bytes_transferred);
+
     if (error)
     {
         close();
@@ -376,13 +406,13 @@ void TcpConnection<Derived, SocketType>::get_peer_address(std::string & ip, unsi
 template <class Derived, class SocketType>
 const void * TcpConnection<Derived, SocketType>::recv_buffer_data()
 {
-    return (reinterpret_cast<const void *>(m_recv_buffer.c_str()));
+    return reinterpret_cast<const void *>(m_recv_buffer.c_str());
 }
 
 template <class Derived, class SocketType>
 std::size_t TcpConnection<Derived, SocketType>::recv_buffer_size()
 {
-    return (m_recv_buffer.size());
+    return m_recv_buffer.size();
 }
 
 template <class Derived, class SocketType>
@@ -390,10 +420,10 @@ bool TcpConnection<Derived, SocketType>::recv_buffer_copy(void * buf, std::size_
 {
     if (nullptr == buf || m_recv_buffer.size() < len)
     {
-        return (false);
+        return false;
     }
     memcpy(buf, m_recv_buffer.c_str(), len);
-    return (true);
+    return true;
 }
 
 template <class Derived, class SocketType>
@@ -401,11 +431,11 @@ bool TcpConnection<Derived, SocketType>::recv_buffer_move(void * buf, std::size_
 {
     if (nullptr == buf || m_recv_buffer.size() < len)
     {
-        return (false);
+        return false;
     }
     memcpy(buf, m_recv_buffer.c_str(), len);
     m_recv_buffer.consume(len);
-    return (true);
+    return true;
 }
 
 template <class Derived, class SocketType>
@@ -413,10 +443,10 @@ bool TcpConnection<Derived, SocketType>::recv_buffer_drop(std::size_t len)
 {
     if (m_recv_buffer.size() < len)
     {
-        return (false);
+        return false;
     }
     m_recv_buffer.consume(len);
-    return (true);
+    return true;
 }
 
 template <class Derived, class SocketType>
@@ -430,13 +460,13 @@ bool TcpConnection<Derived, SocketType>::send_buffer_fill(const void * data, std
 {
     if (nullptr == data)
     {
-        return (0 == len);
+        return 0 == len;
     }
     if (0 != len)
     {
         post_send_data(data, len);
     }
-    return (true);
+    return true;
 }
 
 class TcpSession : public TcpConnection<TcpSession, boost::asio::ip::tcp::socket>, public std::enable_shared_from_this<TcpSession>

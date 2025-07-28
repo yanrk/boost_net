@@ -17,7 +17,7 @@
 #include <vector>
 #include <memory>
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(_WIN32) || defined(_WIN64)
     #define BOOST_NET_CDECL             __cdecl
     #define BOOST_NET_STDCALL           __stdcall
     #ifdef EXPORT_BOOST_NET_DLL
@@ -33,7 +33,7 @@
     #define BOOST_NET_CDECL
     #define BOOST_NET_STDCALL
     #define BOOST_NET_API
-#endif // _MSC_VER
+#endif // defined(_MSC_VER) || defined(_WIN32) || defined(_WIN64)
 
 namespace BoostNet { // namespace BoostNet begin
 
@@ -113,7 +113,7 @@ public:
     void exit();
 
 public:
-    void get_ports(std::vector<uint16_t> & ports);
+    void get_ports(std::vector<unsigned short> & ports);
 
 public:
     bool create_connection(const std::string & host, const std::string & service, bool sync_connect = true, const void * identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);
@@ -186,7 +186,7 @@ public:
     void exit();
 
 public:
-    void get_ports(std::vector<uint16_t> & ports);
+    void get_ports(std::vector<unsigned short> & ports);
 
 public:
     bool create_connection(const std::string & host, const std::string & service, bool sync_connect = true, const void * identity = 0, const char * bind_ip = "0.0.0.0", unsigned short bind_port = 0);

@@ -60,7 +60,7 @@ private:
     void push_send_data(endpoint_buffer_type endpoint_data);
 
 private:
-    void handle_send(const boost::system::error_code & error);
+    void handle_send(const boost::system::error_code & error, std::size_t bytes_transferred);
     void handle_recv(const boost::system::error_code & error, std::size_t bytes_transferred);
     void handle_close(endpoint_type endpoint);
     void handle_stop();

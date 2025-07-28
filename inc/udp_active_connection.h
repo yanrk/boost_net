@@ -23,6 +23,8 @@ namespace BoostNet { // namespace BoostNet begin
 class UdpActiveConnection : public UdpConnectionBase, public std::enable_shared_from_this<UdpActiveConnection>
 {
 public:
+    typedef boost::asio::ip::udp::resolver::results_type        resolver_results_type;
+    typedef resolver_results_type::iterator                     resolver_iterator_type;
     typedef boost::asio::ip::udp::endpoint                      endpoint_type;
     typedef boost::asio::ip::udp::socket                        socket_type;
     typedef boost::asio::io_context                             io_context_type;
@@ -62,8 +64,8 @@ public:
     void start();
 
 public:
-    void handle_resolve(const boost::system::error_code & error, boost::asio::ip::udp::resolver::iterator iterator, boost::asio::ip::udp::endpoint host_endpoint, resolver_ptr resolver);
-    void handle_connect(const boost::system::error_code & error, boost::asio::ip::udp::resolver::iterator iterator, boost::asio::ip::udp::endpoint host_endpoint, resolver_ptr resolver);
+    void handle_resolve(const boost::system::error_code & error, const boost::asio::ip::udp::resolver::results_type & results, boost::asio::ip::udp::endpoint host_endpoint, resolver_ptr resolver);
+    void handle_connect(const boost::system::error_code & error);
 
 private:
     void send();
@@ -73,7 +75,7 @@ private:
     void push_send_data(std::vector<char> data);
 
 private:
-    void handle_send(const boost::system::error_code & error);
+    void handle_send(const boost::system::error_code & error, std::size_t bytes_transferred);
     void handle_recv(const boost::system::error_code & error, std::size_t bytes_transferred);
 
 private:
@@ -82,6 +84,8 @@ private:
 private:
     io_context_type                               & m_io_context;
     UdpServiceBase                                * m_udp_service;
+    resolver_results_type                           m_resolver_results;
+    resolver_iterator_type                          m_resolver_iterator;
     bool                                            m_running;
     const void                                    * m_identity;
     socket_type                                     m_socket;
