@@ -33,11 +33,11 @@ bool TestService::on_connect(BoostNet::TcpConnectionSharedPtr connection, const 
 
     if (m_requester)
     {
-        return (insert_connection(connection) && send_message(connection));
+        return insert_connection(connection) && send_message(connection);
     }
     else
     {
-        return (false);
+        return false;
     }
 }
 
@@ -47,23 +47,23 @@ bool TestService::on_accept(BoostNet::TcpConnectionSharedPtr connection, unsigne
 
     if (!m_requester)
     {
-        return (insert_connection(connection));
+        return insert_connection(connection);
     }
     else
     {
         assert(false);
-        return (false);
+        return false;
     }
 }
 
 bool TestService::on_recv(BoostNet::TcpConnectionSharedPtr connection)
 {
-    return (recv_message(connection));
+    return recv_message(connection);
 }
 
 bool TestService::on_send(BoostNet::TcpConnectionSharedPtr connection)
 {
-    return (true);
+    return true;
 }
 
 void TestService::on_close(BoostNet::TcpConnectionSharedPtr connection)
@@ -80,7 +80,7 @@ bool TestService::insert_connection(BoostNet::TcpConnectionSharedPtr connection)
 {
     if (!connection)
     {
-        return (false);
+        return false;
     }
     std::string host_ip;
     unsigned short host_port = 0;
@@ -90,7 +90,7 @@ bool TestService::insert_connection(BoostNet::TcpConnectionSharedPtr connection)
     connection->get_peer_address(peer_ip, peer_port);
     printf("connect: %u, [%s:%u] -> [%s:%u]\n", static_cast<uint32_t>(++m_connect_count), host_ip.c_str(), host_port, peer_ip.c_str(), peer_port);
     connection->set_user_data(reinterpret_cast<void *>(0));
-    return (true);
+    return true;
 }
 
 bool TestService::remove_connection(BoostNet::TcpConnectionSharedPtr connection)
@@ -107,14 +107,14 @@ bool TestService::remove_connection(BoostNet::TcpConnectionSharedPtr connection)
     {
         assert(false);
     }
-    return (true);
+    return true;
 }
 
 bool TestService::send_message(BoostNet::TcpConnectionSharedPtr connection)
 {
     if (0 == m_max_message_count)
     {
-        return (true);
+        return true;
     }
 
     std::size_t count = reinterpret_cast<std::size_t>(connection->get_user_data());
@@ -127,7 +127,7 @@ bool TestService::send_message(BoostNet::TcpConnectionSharedPtr connection)
         unsigned short peer_port = 0;
         connection->get_peer_address(peer_ip, peer_port);
         printf("send finish: %u, [%s:%u] -> [%s:%u]\n", static_cast<uint32_t>(++m_send_finish_count), host_ip.c_str(), host_port, peer_ip.c_str(), peer_port);
-        return (false);
+        return false;
     }
 
     ++count;
@@ -138,7 +138,7 @@ bool TestService::send_message(BoostNet::TcpConnectionSharedPtr connection)
     if (!connection->send_buffer_fill(head, 2))
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     for (std::size_t index = 0; index < count; ++index)
@@ -146,7 +146,7 @@ bool TestService::send_message(BoostNet::TcpConnectionSharedPtr connection)
         if (!connection->send_buffer_fill(msg_blk, msg_len))
         {
             assert(false);
-            return (false);
+            return false;
         }
     }
 
@@ -154,12 +154,12 @@ bool TestService::send_message(BoostNet::TcpConnectionSharedPtr connection)
     if (!connection->send_buffer_fill(tail, 1))
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     connection->set_user_data(reinterpret_cast<void *>(count));
 
-    return (true);
+    return true;
 }
 
 bool TestService::recv_message(BoostNet::TcpConnectionSharedPtr connection)
@@ -171,26 +171,26 @@ bool TestService::recv_message(BoostNet::TcpConnectionSharedPtr connection)
 
     if (data_len < 2)
     {
-        return (true);
+        return true;
     }
 
     std::size_t need_len = static_cast<unsigned char>(data[0]) * 256U + static_cast<unsigned char>(data[1]);
     if (data_len < need_len)
     {
         connection->recv_buffer_water_mark(need_len);
-        return (true);
+        return true;
     }
 
     if (!check_message(connection, data, need_len))
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     if (!connection->recv_buffer_drop(need_len))
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     connection->recv_buffer_water_mark(2);
@@ -198,10 +198,10 @@ bool TestService::recv_message(BoostNet::TcpConnectionSharedPtr connection)
     if (!send_message(connection))
     {
         connection->close();
-        return (false);
+        return false;
     }
 
-    return (true);
+    return true;
 }
 
 bool TestService::check_message(BoostNet::TcpConnectionSharedPtr connection, const char * data, std::size_t data_len)
@@ -210,7 +210,7 @@ bool TestService::check_message(BoostNet::TcpConnectionSharedPtr connection, con
     if (count >= m_max_message_count)
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     ++count;
@@ -219,7 +219,7 @@ bool TestService::check_message(BoostNet::TcpConnectionSharedPtr connection, con
     if (need_len != data_len)
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     data += 2;
@@ -240,7 +240,7 @@ bool TestService::check_message(BoostNet::TcpConnectionSharedPtr connection, con
 
     connection->set_user_data(reinterpret_cast<void *>(count));
 
-    return (true);
+    return true;
 }
 
 bool TestService::on_connect(BoostNet::UdpConnectionSharedPtr connection, const void * identity)
@@ -249,12 +249,12 @@ bool TestService::on_connect(BoostNet::UdpConnectionSharedPtr connection, const 
 
     if (m_requester)
     {
-        return (insert_connection(connection) && send_message(connection));
+        return insert_connection(connection) && send_message(connection);
     }
     else
     {
         assert(false);
-        return (false);
+        return false;
     }
 }
 
@@ -264,23 +264,23 @@ bool TestService::on_accept(BoostNet::UdpConnectionSharedPtr connection, unsigne
 
     if (!m_requester)
     {
-        return (insert_connection(connection));
+        return insert_connection(connection);
     }
     else
     {
         assert(false);
-        return (false);
+        return false;
     }
 }
 
 bool TestService::on_recv(BoostNet::UdpConnectionSharedPtr connection)
 {
-    return (recv_message(connection));
+    return recv_message(connection);
 }
 
 bool TestService::on_send(BoostNet::UdpConnectionSharedPtr connection)
 {
-    return (true);
+    return true;
 }
 
 void TestService::on_close(BoostNet::UdpConnectionSharedPtr connection)
@@ -297,7 +297,7 @@ bool TestService::insert_connection(BoostNet::UdpConnectionSharedPtr connection)
 {
     if (!connection)
     {
-        return (false);
+        return false;
     }
     std::string host_ip;
     unsigned short host_port = 0;
@@ -307,7 +307,7 @@ bool TestService::insert_connection(BoostNet::UdpConnectionSharedPtr connection)
     connection->get_peer_address(peer_ip, peer_port);
     printf("connect: %u, [%s:%u] -> [%s:%u]\n", static_cast<uint32_t>(++m_connect_count), host_ip.c_str(), host_port, peer_ip.c_str(), peer_port);
     connection->set_user_data(reinterpret_cast<void *>(0));
-    return (true);
+    return true;
 }
 
 bool TestService::remove_connection(BoostNet::UdpConnectionSharedPtr connection)
@@ -324,14 +324,14 @@ bool TestService::remove_connection(BoostNet::UdpConnectionSharedPtr connection)
     {
         assert(false);
     }
-    return (true);
+    return true;
 }
 
 bool TestService::send_message(BoostNet::UdpConnectionSharedPtr connection)
 {
     if (0 == m_max_message_count)
     {
-        return (true);
+        return true;
     }
 
     std::size_t count = reinterpret_cast<std::size_t>(connection->get_user_data());
@@ -344,7 +344,7 @@ bool TestService::send_message(BoostNet::UdpConnectionSharedPtr connection)
         unsigned short peer_port = 0;
         connection->get_peer_address(peer_ip, peer_port);
         printf("send finish: %u, [%s:%u] -> [%s:%u]\n", static_cast<uint32_t>(++m_send_finish_count), host_ip.c_str(), host_port, peer_ip.c_str(), peer_port);
-        return (false);
+        return false;
     }
 
     ++count;
@@ -352,12 +352,12 @@ bool TestService::send_message(BoostNet::UdpConnectionSharedPtr connection)
     if (!connection->send_buffer_fill(msg_blk, msg_len))
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     connection->set_user_data(reinterpret_cast<void *>(count));
 
-    return (true);
+    return true;
 }
 
 bool TestService::recv_message(BoostNet::UdpConnectionSharedPtr connection)
@@ -367,7 +367,7 @@ bool TestService::recv_message(BoostNet::UdpConnectionSharedPtr connection)
     if (!connection->recv_buffer_has_data())
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     const char * data = reinterpret_cast<const char *>(connection->recv_buffer_data());
@@ -376,28 +376,28 @@ bool TestService::recv_message(BoostNet::UdpConnectionSharedPtr connection)
     if (!check_message(connection, data, data_len))
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     if (!connection->recv_buffer_drop())
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     if (connection->recv_buffer_has_data())
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     if (!send_message(connection))
     {
         connection->close();
-        return (false);
+        return false;
     }
 
-    return (true);
+    return true;
 }
 
 bool TestService::check_message(BoostNet::UdpConnectionSharedPtr connection, const char * data, std::size_t data_len)
@@ -406,7 +406,7 @@ bool TestService::check_message(BoostNet::UdpConnectionSharedPtr connection, con
     if (count >= m_max_message_count)
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     ++count;
@@ -414,12 +414,12 @@ bool TestService::check_message(BoostNet::UdpConnectionSharedPtr connection, con
     if (msg_len != data_len || 0 != memcmp(data, msg_blk, msg_len))
     {
         assert(false);
-        return (false);
+        return false;
     }
 
     connection->set_user_data(reinterpret_cast<void *>(count));
 
-    return (true);
+    return true;
 }
 
 bool TestService::init()
@@ -430,16 +430,16 @@ bool TestService::init()
         {
             if (!m_tcp_manager.init(this, 5, nullptr, 0))
             {
-                return (false);
+                return false;
             }
             for (std::size_t index = 0; index < m_max_connect_count; ++index)
             {
                 if (!m_tcp_manager.create_connection("127.0.0.1", 12345, m_sync_connect))
                 {
-                    return (false);
+                    return false;
                 }
             }
-            return (true);
+            return true;
         }
         else
         {
@@ -447,9 +447,9 @@ bool TestService::init()
             unsigned short port[] = { 12345 };
             if (!m_tcp_manager.init(this, 5, host, port, sizeof(port) / sizeof(port[0])))
             {
-                return (false);
+                return false;
             }
-            return (true);
+            return true;
         }
     }
     else
@@ -458,16 +458,16 @@ bool TestService::init()
         {
             if (!m_udp_manager.init(this, 5, nullptr, 0))
             {
-                return (false);
+                return false;
             }
             for (std::size_t index = 0; index < m_max_connect_count; ++index)
             {
                 if (!m_udp_manager.create_connection("127.0.0.1", 12345, m_sync_connect))
                 {
-                    return (false);
+                    return false;
                 }
             }
-            return (true);
+            return true;
         }
         else
         {
@@ -475,9 +475,9 @@ bool TestService::init()
             unsigned short port[] = { 12345 };
             if (!m_udp_manager.init(this, 5, host, port, sizeof(port) / sizeof(port[0])))
             {
-                return (false);
+                return false;
             }
-            return (true);
+            return true;
         }
     }
 }

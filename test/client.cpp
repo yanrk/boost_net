@@ -16,5 +16,5 @@ int main(int, char *[])
 
     client.exit();
 
-    return (0);
+    return 0;
 }

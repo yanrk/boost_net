@@ -96,7 +96,7 @@ SslProxy::~SslProxy()
 
 bool SslProxy::running() const
 {
-    return (m_running);
+    return m_running;
 }
 
 bool SslProxy::init(const proxy_config_t & proxy_config)
@@ -122,12 +122,12 @@ bool SslProxy::init(const proxy_config_t & proxy_config)
     if (!m_tcp_manager.init(this, 10, m_src_host.c_str(), &m_src_port, 1, false, nullptr, &client_certificate))
     {
         RUN_LOG_ERR("ssl proxy init failure while tcp manager init on port %d", m_src_port);
-        return (false);
+        return false;
     }
 
     RUN_LOG_DBG("ssl proxy init success");
 
-    return (true);
+    return true;
 }
 
 void SslProxy::exit()
@@ -163,7 +163,7 @@ bool SslProxy::on_connect(BoostNet::TcpConnectionSharedPtr connection, const voi
     connection_pair_t * connection_pair = const_cast<connection_pair_t *>(reinterpret_cast<const connection_pair_t *>(identity));
     if (nullptr == connection_pair)
     {
-        return (false);
+        return false;
     }
 
     if (!!connection)
@@ -172,7 +172,7 @@ bool SslProxy::on_connect(BoostNet::TcpConnectionSharedPtr connection, const voi
         record_connection(connection_pair, "connect");
         connection->set_user_data(connection_pair);
         connection_pair->dst = connection;
-        return (on_recv(connection_pair->src));
+        return on_recv(connection_pair->src);
     }
     else
     {
@@ -181,7 +181,7 @@ bool SslProxy::on_connect(BoostNet::TcpConnectionSharedPtr connection, const voi
         {
             src_connection->close();
         }
-        return (false);
+        return false;
     }
 }
 
@@ -195,12 +195,12 @@ bool SslProxy::on_accept(BoostNet::TcpConnectionSharedPtr connection, unsigned s
     if (m_tcp_manager.create_connection(m_dst_host, m_dst_port, false, connection_pair))
     {
         connection->set_user_data(connection_pair);
-        return (true);
+        return true;
     }
     else
     {
         delete connection_pair;
-        return (false);
+        return false;
     }
 }
 
@@ -208,13 +208,13 @@ bool SslProxy::on_recv(BoostNet::TcpConnectionSharedPtr connection)
 {
     if (!connection)
     {
-        return (false);
+        return false;
     }
 
     connection_pair_t * connection_pair = reinterpret_cast<connection_pair_t *>(connection->get_user_data());
     if (nullptr == connection_pair)
     {
-        return (false);
+        return false;
     }
 
     BoostNet::TcpConnectionSharedPtr recv_connection;
@@ -231,12 +231,12 @@ bool SslProxy::on_recv(BoostNet::TcpConnectionSharedPtr connection)
     }
     else
     {
-        return (false);
+        return false;
     }
 
     if (!send_connection)
     {
-        return (true);
+        return true;
     }
 
     const void * data = recv_connection->recv_buffer_data();
@@ -244,20 +244,20 @@ bool SslProxy::on_recv(BoostNet::TcpConnectionSharedPtr connection)
 
     if (!send_connection->send_buffer_fill(data, size))
     {
-        return (false);
+        return false;
     }
 
     if (!recv_connection->recv_buffer_drop(size))
     {
-        return (false);
+        return false;
     }
 
-    return (true);
+    return true;
 }
 
 bool SslProxy::on_send(BoostNet::TcpConnectionSharedPtr connection)
 {
-    return (true);
+    return true;
 }
 
 void SslProxy::on_close(BoostNet::TcpConnectionSharedPtr connection)
@@ -337,7 +337,7 @@ int ssl_proxy_main(int argc, char * argv[])
     if (argc < 6)
     {
         std::cout << "usage: " << argv[0] << " <listen-port> <forward-host> <forward-port> <cert-file> <key-file>" << std::endl;
-        return (-1);
+        return -1;
     }
 
     proxy_config_t proxy_config;
@@ -351,7 +351,7 @@ int ssl_proxy_main(int argc, char * argv[])
     if (!ssl_proxy.init(proxy_config))
     {
         std::cout << "init ssl proxy failure" << std::endl;
-        return (5);
+        return 5;
     }
 
 #ifdef _MSC_VER
@@ -382,5 +382,5 @@ int ssl_proxy_main(int argc, char * argv[])
 
     ssl_proxy.exit();
 
-    return (0);
+    return 0;
 }
